@@ -11,6 +11,8 @@
     "@cx-lab/contracts": "^1.0.0",
     "@cx-lab/memory": "^1.0.0",
     "@cx-lab/dream": "^1.0.0",
-    "@cx-lab/infra-db": "^1.0.0"
+    "@cx-lab/infra-db": "^1.0.0",
+    "@cx-lab/digitalocean": "^1.0.0",
+    "@cx-lab/gemini": "^1.0.0"
   }
 }

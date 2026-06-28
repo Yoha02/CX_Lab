@@ -172,7 +172,47 @@ export async function initDb() {
     ]);
     console.log('Seeded profile: prof_jordan_003 (Jordan - Discount Shopper)');
 
-    // 4. Insert Policy Versions
+    // 4. Insert Sam profile (Maya-like Loyal Shopper for post-patch success call)
+    await client.query(`
+      INSERT INTO profiles (
+        profile_id, shopper_mode, badges, features, loyalty_tier,
+        ltv_bucket, family_size, recent_orders_90d, prior_tickets_90d,
+        risk_flags, learned_preferences_before_call
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      ON CONFLICT (profile_id) DO UPDATE SET
+        shopper_mode = EXCLUDED.shopper_mode,
+        badges = EXCLUDED.badges,
+        features = EXCLUDED.features,
+        loyalty_tier = EXCLUDED.loyalty_tier,
+        ltv_bucket = EXCLUDED.ltv_bucket,
+        family_size = EXCLUDED.family_size,
+        recent_orders_90d = EXCLUDED.recent_orders_90d,
+        prior_tickets_90d = EXCLUDED.prior_tickets_90d,
+        risk_flags = EXCLUDED.risk_flags,
+        learned_preferences_before_call = EXCLUDED.learned_preferences_before_call
+    `, [
+      'prof_sam_004',
+      'Loyal Shopper',
+      ['Urgent', 'Gift Order', 'High Value'],
+      JSON.stringify({
+        age_range: '35-44',
+        region: 'CA',
+        orders_last_90_days: 4,
+        lifetime_value: 'high',
+        prior_tickets: 1,
+        current_issue: 'late_delivery'
+      }),
+      'gold',
+      'high',
+      3,
+      4,
+      1,
+      ['late_delivery_sensitive', 'gift_deadline'],
+      ['Gen 3 demo target: acknowledge deadline, check replacement inventory, preserve refund safety after rescue options']
+    ]);
+    console.log('Seeded profile: prof_sam_004 (Sam - Loyal Shopper, post-patch validation)');
+
+    // 5. Insert Policy Versions
     await client.query(`
       INSERT INTO policy_versions (policy_version_id, name, is_promoted)
       VALUES ($1, $2, $3)
@@ -188,9 +228,17 @@ export async function initDb() {
         name = EXCLUDED.name,
         is_promoted = EXCLUDED.is_promoted
     `, ['policy_late_delivery_gen2', 'Generation 2 Proposed Policy', false]);
-    console.log('Seeded policy versions: policy_late_delivery_gen1, policy_late_delivery_gen2');
 
-    // 5. Seed Playbook
+    await client.query(`
+      INSERT INTO policy_versions (policy_version_id, name, is_promoted)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (policy_version_id) DO UPDATE SET
+        name = EXCLUDED.name,
+        is_promoted = EXCLUDED.is_promoted
+    `, ['policy_late_delivery_gen3', 'Generation 3 Dream-Promoted Deadline Inventory Policy', false]);
+    console.log('Seeded policy versions: policy_late_delivery_gen1, policy_late_delivery_gen2, policy_late_delivery_gen3');
+
+    // 6. Seed Playbook
     await client.query(`
       INSERT INTO playbooks (shopper_mode, intent, policy_version, playbook_text, is_active)
       VALUES ($1, $2, $3, $4, $5)

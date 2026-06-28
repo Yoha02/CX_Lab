@@ -14,3 +14,9 @@ Initial fixture set:
 - policy-first baseline
 - inventory-first challenger
 - Gen 1/2/3 containment metrics
+
+Canonical final-demo fixture:
+
+- `golden_demo_seed.json`
+
+This file maps the exact profiles, playbooks, failed runs, dream cluster, and post-patch success run used by the golden hackathon script in `docs/GOLDEN_HACKATHON_SCRIPT.md`.
