@@ -1,11 +1,18 @@
-import { describe, it, expect } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { render, screen } from "@testing-library/react";
 import { SideRail } from "./SideRail.js";
 
+vi.mock("../../data/index.js", () => ({
+  getDataSource: () => ({
+    getProfile: async () => null,
+    getProfileMemory: async () => [],
+  }),
+}));
+
 describe("SideRail", () => {
-  it("shows Maya from the mock data source in display mode", async () => {
+  it("renders brand and empty profile state", () => {
     render(<SideRail />);
-    await waitFor(() => expect(screen.getByText("Maya")).toBeInTheDocument());
-    expect(screen.getByText(/display mode/i)).toBeInTheDocument();
+    expect(screen.getByText("CX_lab Dojo")).toBeInTheDocument();
+    expect(screen.getByText(/active profile/i)).toBeInTheDocument();
   });
 });

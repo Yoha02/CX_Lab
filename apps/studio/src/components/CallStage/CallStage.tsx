@@ -1,41 +1,207 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useRunStore } from "../../state/runStore.js";
-import { startPipeline } from "../../lib/voicePipeline.js";
+import { connectPipeline, type PipelineHandle } from "../../lib/voicePipeline.js";
 import { TranscriptTurn } from "./TranscriptTurn.js";
 import { Waveform } from "./Waveform.js";
 
+const LANG_NAMES: Record<string, string> = {
+  "es": "Spanish", "es-MX": "Spanish (MX)", "es-ES": "Spanish (ES)",
+  "fr": "French", "fr-FR": "French (FR)",
+  "de": "German", "pt": "Portuguese", "pt-BR": "Portuguese (BR)",
+  "zh": "Chinese", "ja": "Japanese", "ko": "Korean",
+  "ar": "Arabic", "hi": "Hindi", "it": "Italian",
+};
+
+function langName(code: string) {
+  return LANG_NAMES[code] ?? code;
+}
+
 export function CallStage() {
   const { turns, callStatus } = useRunStore();
-  const callStatusLive = useRunStore((s) => s.callStatus);
-  const stopRef = useRef<null | (() => void)>(null);
+  const languageSwitch = useRunStore(s => s.languageSwitch);
+  const pipeline = useRef<PipelineHandle | null>(null);
+  const [elapsed, setElapsed] = useState(0);
 
+  // Auto-connect on page load
   useEffect(() => {
-    if (callStatusLive === "live" && !stopRef.current) {
-      startPipeline().then((stop) => {
-        stopRef.current = stop;
-      });
+    const handle = connectPipeline();
+    pipeline.current = handle;
+    return () => {
+      handle.disconnect();
+      pipeline.current = null;
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Elapsed timer while speaking
+  useEffect(() => {
+    if (callStatus !== "speaking") { setElapsed(0); return; }
+    const t = setInterval(() => setElapsed(e => e + 1), 1000);
+    return () => clearInterval(t);
+  }, [callStatus]);
+
+  const mm = String(Math.floor(elapsed / 60)).padStart(2, "0");
+  const ss = String(elapsed % 60).padStart(2, "0");
+
+  const isMuted = callStatus !== "speaking";
+
+  function toggleMic() {
+    const h = pipeline.current;
+    if (!h) return;
+    if (isMuted) {
+      h.unmute();          // unlockAudio() is called inside unmute()
+    } else {
+      h.mute();
     }
-    if (callStatusLive !== "live" && stopRef.current) {
-      stopRef.current();
-      stopRef.current = null;
-    }
-  }, [callStatusLive]);
+  }
+
+  const statusLabel =
+    callStatus === "idle"       ? "Initialising…" :
+    callStatus === "connecting" ? "Connecting…" :
+    callStatus === "ready"      ? "Ready — tap mic to speak" :
+    `Live ${mm}:${ss}`;
+
+  const micColor =
+    callStatus === "speaking" ? "#2f7d57" :
+    callStatus === "ready"    ? "#3f7cac" :
+    "#aaa";
+
+  const micBg =
+    callStatus === "speaking" ? "rgba(47,125,87,0.12)" :
+    callStatus === "ready"    ? "rgba(63,124,172,0.10)" :
+    "rgba(0,0,0,0.04)";
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-sm text-muted">
-          {callStatus === "live" ? "🟢 voice room active" : "idle"}
+    <div className="panel call-stage">
+      {/* Header row */}
+      <div className="call-header">
+        <span style={{ fontSize: 12, fontWeight: 500, color: "#68736e", display: "flex", alignItems: "center", gap: 6, fontFamily: "var(--font-mono)", letterSpacing: "0.01em" }}>
+          {callStatus === "speaking" && <span className="status-dot" />}
+          {statusLabel}
         </span>
-        <Waveform active={callStatus === "live"} />
+
+        {/* Mic toggle — SVG icon */}
+        <button
+          onClick={toggleMic}
+          disabled={callStatus === "idle" || callStatus === "connecting"}
+          style={{
+            width: 40, height: 40, borderRadius: "50%",
+            border: `1.5px solid ${micColor}`,
+            background: micBg,
+            cursor: callStatus === "ready" || callStatus === "speaking" ? "pointer" : "default",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            transition: "all 0.18s ease",
+            boxShadow: callStatus === "speaking" ? `0 0 0 5px rgba(47,125,87,0.15), 0 0 0 9px rgba(47,125,87,0.06)` : "none",
+            flexShrink: 0,
+          }}
+          title={isMuted ? "Unmute — start speaking" : "Mute — send speech to AI"}
+        >
+          {callStatus === "speaking" ? (
+            /* Mic active */
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2f7d57" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="9" y="2" width="6" height="13" rx="3"/>
+              <path d="M5 10a7 7 0 0 0 14 0"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+              <line x1="8" y1="22" x2="16" y2="22"/>
+            </svg>
+          ) : (
+            /* Mic muted */
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={micColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="2" y1="2" x2="22" y2="22"/>
+              <path d="M18.89 13.23A7.12 7.12 0 0 0 19 12"/>
+              <path d="M5 10a7 7 0 0 0 12.65 4.15"/>
+              <path d="M15 9.34V5a3 3 0 0 0-5.68-1.33"/>
+              <path d="M9 9v3a3 3 0 0 0 5.12 2.12"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+              <line x1="8" y1="22" x2="16" y2="22"/>
+            </svg>
+          )}
+        </button>
       </div>
-      <div className="flex-1 overflow-y-auto">
-        {turns.length === 0 && (
-          <p className="text-muted text-sm">waiting for the shopper…</p>
+
+      <Waveform active={callStatus === "speaking"} />
+
+      {/* Language rescue banner */}
+      <AnimatePresence>
+        {languageSwitch && (
+          <motion.div
+            initial={{ opacity: 0, y: -8, scaleY: 0.9 }}
+            animate={{ opacity: 1, y: 0, scaleY: 1 }}
+            exit={{ opacity: 0, y: -8, scaleY: 0.9 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              border: "1.5px solid rgba(63,124,172,0.4)",
+              borderRadius: 8,
+              background: "linear-gradient(135deg, #ddebf4 0%, #e0f0e5 100%)",
+              padding: "12px 14px",
+            }}
+          >
+            {/* Title row */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
+              <span style={{
+                fontSize: 11, fontWeight: 900, textTransform: "uppercase",
+                color: "#3f7cac", letterSpacing: "0.04em",
+              }}>
+                🌐 Gemini 3.5 Live Translate
+              </span>
+              <span style={{
+                fontSize: 11, fontWeight: 800, padding: "2px 8px",
+                borderRadius: 999, background: "#f4dfdc", color: "#8a2a24",
+              }}>
+                {langName(languageSwitch.lang)} → English
+              </span>
+              {languageSwitch.frustration > 0.5 && (
+                <span style={{
+                  fontSize: 11, fontWeight: 800, padding: "2px 8px",
+                  borderRadius: 999, background: "#f4dfdc", color: "#b75d55",
+                }}>
+                  ⚠ frustration spike {(languageSwitch.frustration * 100) | 0}%
+                </span>
+              )}
+            </div>
+
+            {/* Translation side-by-side */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#68736e", marginBottom: 3 }}>
+                  {langName(languageSwitch.lang)}
+                </div>
+                <p style={{ fontSize: 13, margin: 0, lineHeight: 1.4, color: "#1f2726", fontStyle: "italic" }}>
+                  "{languageSwitch.original}"
+                </p>
+              </div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#2f7d57", marginBottom: 3 }}>
+                  English (normalised)
+                </div>
+                <p style={{ fontSize: 13, margin: 0, lineHeight: 1.4, color: "#1f2726" }}>
+                  "{languageSwitch.english}"
+                </p>
+              </div>
+            </div>
+
+            {/* Situation tags */}
+            {languageSwitch.tags.length > 0 && (
+              <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+                {languageSwitch.tags.map(t => (
+                  <span key={t} style={{
+                    fontSize: 11, fontWeight: 800, padding: "2px 8px",
+                    borderRadius: 999, background: "rgba(63,124,172,0.12)", color: "#3f7cac",
+                  }}>{t.replace(/_/g, " ")}</span>
+                ))}
+              </div>
+            )}
+          </motion.div>
         )}
-        {turns.map((t) => (
-          <TranscriptTurn key={t.turn_id} turn={t} />
-        ))}
+      </AnimatePresence>
+
+      {/* Transcript */}
+      <div className="transcript">
+        {turns.length === 0 && (
+          <p style={{ color: "#68736e", fontSize: 14, margin: 0 }}>Waiting for the shopper…</p>
+        )}
+        {turns.map(t => <TranscriptTurn key={t.turn_id} turn={t} />)}
       </div>
     </div>
   );

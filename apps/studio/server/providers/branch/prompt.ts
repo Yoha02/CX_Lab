@@ -14,13 +14,17 @@ export type BranchResult = {
 
 export function buildBranchPrompt(
   englishTranscript: string,
-  ctx: { shopperMode: string; badges: string[]; intent: string; situationTags?: string[] },
+  ctx: { shopperMode: string; badges: string[]; intent?: string; situationTags?: string[] },
   gen: { maxCandidates: number },
 ): string {
-  const tags = (ctx.situationTags ?? []).join(", ") || "none";
+  const intentLine = ctx.intent
+    ? `Current intent: ${ctx.intent}.`
+    : "Infer the shopper's current intent from the transcript below.";
+  const tags = (ctx.situationTags ?? []).join(", ");
+  const tagsLine = tags ? `Situation tags: ${tags}.` : "Infer any relevant situation tags from the transcript.";
   return `You are the policy engine for a retail support voice agent.
-Shopper mode: ${ctx.shopperMode}. Badges: ${ctx.badges.join(", ")}. Current intent: ${ctx.intent}. Situation tags: ${tags}.
-Policy: when the situation involves an urgent event deadline, DO NOT lead with standard shipping policy. Acknowledge the deadline, then check inventory/replacement before any refund/policy talk. Mark policy-first strategies as "pruned".
+Shopper mode: ${ctx.shopperMode}. Badges: ${ctx.badges.join(", ") || "none"}. ${intentLine} ${tagsLine}
+Policy: when the situation involves an urgent event deadline, DO NOT lead with standard policy. Acknowledge the deadline, then check inventory/replacement before any refund/policy talk. Mark policy-first strategies as "pruned".
 Latest shopper message (English): "${englishTranscript}"
 
 Propose ${gen.maxCandidates} candidate agent response strategies. For each, give:

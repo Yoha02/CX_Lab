@@ -68,7 +68,7 @@ branchWss.on("connection", (client) => {
     try {
       const result = await Promise.race([
         generateBranches(req.englishTranscript, req.ctx, req.gen),
-        new Promise((_, rej) => setTimeout(() => rej(new Error("branch timeout")), 8000)),
+        new Promise((_, rej) => setTimeout(() => rej(new Error("branch timeout")), 25000)),
       ]) as Awaited<ReturnType<typeof generateBranches>>;
       let i = 0;
       for (const candidate of result.candidates) {

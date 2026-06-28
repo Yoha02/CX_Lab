@@ -14,21 +14,22 @@ export default function App() {
   useEffect(() => {
     fetchIterations().then(useRunStore.getState().setIterations);
   }, []);
+
   return (
     <div className="app-shell">
-      <TopBar onReset={reset} />
-      <div className="grid grid-cols-[260px_1fr_minmax(320px,40%)] overflow-hidden">
-        <SideRail />
-        <main id="call-stage-slot" className="p-4 overflow-y-auto border-r border-black/10">
+      <SideRail />
+      <main className="workbench">
+        <TopBar onReset={reset} />
+        <div className="hero-grid">
           <CallStage />
           <PredictionPanel />
-          <MetricsRow />
-        </main>
-        <section id="branch-tree-slot" className="p-4 overflow-y-auto">
+        </div>
+        <MetricsRow />
+        <div className="lower-grid">
           <BranchTree />
           <DreamPanel />
-        </section>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

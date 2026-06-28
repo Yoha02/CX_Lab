@@ -2,17 +2,26 @@ import { create } from "zustand";
 import type { Turn, Candidate } from "../lib/contracts.js";
 import type { Iteration } from "./iterations.js";
 
-type CallStatus = "idle" | "connecting" | "live" | "paused";
+export type CallStatus = "idle" | "connecting" | "ready" | "speaking";
+
+export interface LanguageSwitch {
+  lang: string;
+  original: string;
+  english: string;
+  frustration: number;
+  tags: string[];
+}
 
 interface RunState {
-  displayMode: boolean;
   callStatus: CallStatus;
   activeIterationIndex: number;
   iterations: Iteration[];
   turns: Turn[];
   branchCandidates: Candidate[];
   lastGoodCandidates: Candidate[];
-  toggleDisplayMode(): void;
+  detectedIntent: string;
+  languageSwitch: LanguageSwitch | null;
+
   setCallStatus(s: CallStatus): void;
   setActiveIteration(i: number): void;
   setIterations(i: Iteration[]): void;
@@ -20,18 +29,22 @@ interface RunState {
   addCandidate(c: Candidate): void;
   commitBranchFrame(): void;
   clearBranch(): void;
+  setDetectedIntent(intent: string): void;
+  setLanguageSwitch(ls: LanguageSwitch): void;
+  clearLanguageSwitch(): void;
   reset(): void;
 }
 
 export const useRunStore = create<RunState>((set) => ({
-  displayMode: true,             // ON during build; flip OFF for real DataSource
   callStatus: "idle",
   activeIterationIndex: 0,
   iterations: [],
   turns: [],
   branchCandidates: [],
   lastGoodCandidates: [],
-  toggleDisplayMode: () => set((s) => ({ displayMode: !s.displayMode })),
+  detectedIntent: "",
+  languageSwitch: null,
+
   setCallStatus: (callStatus) => set({ callStatus }),
   setActiveIteration: (activeIterationIndex) => set({ activeIterationIndex }),
   setIterations: (iterations) => set({ iterations }),
@@ -42,7 +55,17 @@ export const useRunStore = create<RunState>((set) => ({
       lastGoodCandidates: s.branchCandidates.length ? s.branchCandidates : s.lastGoodCandidates,
     })),
   clearBranch: () => set({ branchCandidates: [] }),
-  reset: () => set({ callStatus: "idle", turns: [], branchCandidates: [] }),
+  setDetectedIntent: (detectedIntent) => set({ detectedIntent }),
+  setLanguageSwitch: (languageSwitch) => set({ languageSwitch }),
+  clearLanguageSwitch: () => set({ languageSwitch: null }),
+  reset: () => set({
+    callStatus: "idle",
+    turns: [],
+    branchCandidates: [],
+    lastGoodCandidates: [],
+    detectedIntent: "",
+    languageSwitch: null,
+  }),
 }));
 
 export const selectActiveIteration = (s: { iterations: Iteration[]; activeIterationIndex: number }) =>

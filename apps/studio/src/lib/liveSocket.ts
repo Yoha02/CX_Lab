@@ -1,8 +1,3 @@
-// NOTE: model id is `gemini-2.5-flash-native-audio-preview-09-2025` per empirical
-// testing; the plan's `gemini-3.5-live-translate-preview` returns 404/1008 from
-// the Live API. The server proxy in apps/studio/server/providers/voice/geminiLive.ts
-// already targets the correct v1alpha endpoint; we just send the model id here.
-
 export interface LiveSocket {
   sendAudioChunk(b64: string): void;
   close(): void;
@@ -11,6 +6,7 @@ export interface LiveSocket {
 export function openLiveSocket(handlers: {
   onSetup(): void;
   onInputText(t: string): void;
+  onOutputText?(t: string): void;
   onClose(): void;
 }): LiveSocket {
   const ws = new WebSocket(`ws://${location.host}/api/live`);
@@ -20,26 +16,39 @@ export function openLiveSocket(handlers: {
     ws.send(
       JSON.stringify({
         setup: {
-          model: "models/gemini-2.5-flash-native-audio-preview-09-2025",
-          generation_config: { response_modalities: ["AUDIO"] },
+          model: "models/gemini-3.5-live-translate-preview",
+          generation_config: {
+            response_modalities: ["TEXT"],
+          },
+          // Request auto language detection + English output
           input_audio_transcription: {},
+          output_audio_transcription: {},
         },
       })
     );
 
-  ws.onmessage = async (ev) => {
+  ws.onmessage = (ev) => {
     const raw = ev.data instanceof ArrayBuffer ? new TextDecoder().decode(ev.data) : ev.data;
     let msg: any;
-    try {
-      msg = JSON.parse(raw);
-    } catch {
+    try { msg = JSON.parse(raw); } catch { return; }
+
+    if (msg.setupComplete) {
+      handlers.onSetup();
       return;
     }
-    if (msg.setupComplete) handlers.onSetup();
-    const t = msg.serverContent?.inputTranscription?.text;
-    if (t) handlers.onInputText(t);
+
+    // Input transcription (original language — what customer said)
+    const inputText = msg.serverContent?.inputTranscription?.text;
+    if (inputText) handlers.onInputText(inputText);
+
+    // Output transcription (English translation from Gemini)
+    const outputText = msg.serverContent?.outputTranscription?.text
+      ?? msg.serverContent?.parts?.[0]?.text;
+    if (outputText && handlers.onOutputText) handlers.onOutputText(outputText);
   };
+
   ws.onclose = () => handlers.onClose();
+  ws.onerror = (e) => console.error("[liveSocket] error", e);
 
   return {
     sendAudioChunk: (b64) => {

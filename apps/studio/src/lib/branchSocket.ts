@@ -3,7 +3,7 @@ import type { Candidate } from "./contracts.js";
 export function streamBranches(
   payload: {
     englishTranscript: string;
-    ctx: { shopperMode: string; badges: string[]; intent: string; situationTags?: string[] };
+    ctx: { shopperMode: string; badges: string[]; intent?: string; situationTags?: string[] };
     gen: { model: string; maxCandidates: number };
   },
   handlers: {
