@@ -1,4 +1,5 @@
 import { useRunStore } from "../../state/runStore.js";
+import { IterationSwitch } from "./IterationSwitch.js";
 
 export function TopBar({ onReset }: { onReset: () => void }) {
   const { callStatus, setCallStatus } = useRunStore();
@@ -12,6 +13,7 @@ export function TopBar({ onReset }: { onReset: () => void }) {
           onClick={() => setCallStatus(live ? "paused" : "live")}
           aria-label={live ? "pause" : "play"}>{live ? "⏸ pause" : "▶ start"}</button>
         <span className="text-muted">status: {callStatus}</span>
+        <IterationSwitch />
       </div>
     </header>
   );
