@@ -44,6 +44,7 @@ const demoState = {
   goldenSeed: null,
   activeCall: "baseline",
   voiceMode: "live",
+  activePersona: "maya",
   micActive: false,
   liveSocket: null,
   micHandle: null,
@@ -739,6 +740,9 @@ function callBranchSocket(englishTranscript) {
 function openLiveSocket() {
   if (demoState.liveSocket && demoState.liveSocket.readyState <= 1) return demoState.liveSocket;
   const socket = new WebSocket(`${WS_BASE}/api/live`);
+  // Gemini Live sends its transcription as BINARY frames. Without this they arrive as a
+  // Blob and JSON.parse silently throws, dropping every transcript. Decode as text instead.
+  socket.binaryType = "arraybuffer";
   demoState.liveSocket = socket;
   socket.onopen = () => {
     setVoiceStatus("live", "Connecting Gemini Live");
@@ -752,9 +756,10 @@ function openLiveSocket() {
     }));
   };
   socket.onmessage = (event) => {
+    const raw = event.data instanceof ArrayBuffer ? new TextDecoder().decode(event.data) : event.data;
     let message;
     try {
-      message = JSON.parse(event.data);
+      message = JSON.parse(raw);
     } catch {
       return;
     }
@@ -787,68 +792,111 @@ function sendAudioChunk(base64) {
 }
 
 function fallbackLiveTranscript() {
-  return demoState.promoted
-    ? "This gift is for my son's party tomorrow and the tracking has not moved."
-    : "My daughter's birthday is tomorrow and the tracking says the package has not shipped.";
+  return demoState.activePersona === "john"
+    ? "My anniversary dinner is tomorrow and the outfit still says delayed; if you cannot fix it I will need to cancel."
+    : "My daughter's birthday is tomorrow and the tracking says the package has not even shipped yet.";
 }
 
+async function callAgentReply(transcript) {
+  if (!demoState.apiOnline) return null;
+  try {
+    return await apiFetch("/api/agent-reply", {
+      method: "POST",
+      body: JSON.stringify({
+        transcript,
+        persona: demoState.activePersona,
+        history: (demoState.liveTurns || []).map((t) => ({ speaker: t.speaker, text: t.text }))
+      })
+    });
+  } catch (error) {
+    console.warn("[ui-final] agent reply failed", error);
+    return null;
+  }
+}
+
+// Metrics derived from the REAL measured frustration + the persona's containment arc.
+function liveMetrics(frustration, contained) {
+  const inv = 1 - Math.max(0, Math.min(1, Number(frustration) || 0));
+  const containment = contained ? Math.round(62 + inv * 33) : Math.round(34 + inv * 22);
+  const nps = contained ? Math.round(52 + inv * 38) : Math.round(16 + inv * 24);
+  const risk = contained ? Math.round(10 + frustration * 22) : Math.round(44 + frustration * 44);
+  return [`${containment}%`, String(nps), `${risk}%`];
+}
+
+// Real voice turn: STT text -> translate/sentiment -> branch tree -> Gemini agent reply -> TTS.
 async function handleLiveUtterance(rawText) {
-  const raw = rawText.trim() || fallbackLiveTranscript();
-  if (!raw) return;
-  if (!liveProfile.classList.contains("identified")) identifyCaller(demoState.promoted ? "sam" : "maya");
+  const persona = demoState.activePersona;
+  const contained = persona === "john";
+  // Genuine speech only — never substitute a scripted line for what the shopper said.
+  const raw = (rawText || "").trim();
+  if (!raw) {
+    setVoiceStatus("ready", "Didn't catch any speech — unmute and try again");
+    return;
+  }
+  if (!liveProfile.classList.contains("identified")) identifyCaller(persona);
   setVoiceStatus("live", "Translating + scoring");
+
+  // 1. Real translation + sentiment of what the shopper actually said
   const translation = await callTranslationProbe(raw);
   const english = translation?.english || raw;
-  const frustration = translation?.sentiment?.frustration ?? (/refund|cancel/i.test(english) ? 0.82 : 0.58);
-  const sentimentLabel = translation?.sentiment?.label || (frustration > 0.7 ? "angry" : "anxious");
-  const tags = translation?.tags || ["urgent_event_deadline"];
-  appendLiveTurn({
-    speaker: "shopper",
-    text: raw,
-    predictions: [["branching", 42], ["refund safety", 24], ["inventory lookup", 22], ["other", 12]],
-    sentiment: [sentimentLabel, `${Math.round((1 - frustration) * 100)}%`],
-    metrics: demoState.promoted ? ["63%", "48", "28%"] : ["46%", "29", "52%"]
-  });
-  if (translation && (translation.lang !== "en-US" || tags.length)) {
-    appendSystemTurn(
-      "Gemini translate",
-      `${english} (${sentimentLabel}, ${Math.round(frustration * 100)}% frustration; ${tags.join(", ")})`
-    );
-  }
-  let branch;
+  const frustration = translation?.sentiment?.frustration ?? (/refund|cancel/i.test(english) ? 0.78 : 0.4);
+  const sentimentLabel = translation?.sentiment?.label || (frustration > 0.6 ? "frustrated" : "neutral");
+  const tags = translation?.tags || [];
+
+  // 2. Real branch — the live experiment-tree predictions
+  let branch = null;
   try {
     branch = await callBranchSocket(english);
   } catch (error) {
     console.warn("[ui-final] branch stream failed", error);
-    branch = {
-      candidates: [
-        { predicted_next_intent: "accept_replacement", score: demoState.promoted ? 0.91 : 0.78 },
-        { predicted_next_intent: "cancel_or_refund_threat", score: demoState.promoted ? 0.21 : 0.55 },
-        { predicted_next_intent: "asks_confirmation", score: 0.34 }
-      ],
-      championStrategy: "deadline acknowledgement + inventory lookup",
-      agentResponse: demoState.promoted
-        ? "I see the party deadline. Before I talk policy, I am checking local replacement inventory and courier options now."
-        : "I hear the deadline. I am going to check local replacement inventory before we talk refund policy."
-    };
-    renderCandidatePredictions(branch.candidates);
   }
-  appendSystemTurn("preload", `Champion branch: ${branch.championStrategy}. Inventory and courier tools queued before the next reply.`);
-  const contained = demoState.promoted || /inventory|replacement|courier/i.test(branch.agentResponse);
+  const predictions = branch && Array.isArray(branch.candidates) && branch.candidates.length
+    ? branch.candidates.slice().sort((a, b) => Number(b.score || 0) - Number(a.score || 0)).slice(0, 4)
+        .map((c) => [c.predicted_next_intent || c.strategy || "next intent", Math.max(1, Math.min(99, Math.round(Number(c.score || 0) * 100)))])
+    : [];
+
+  // Shopper turn — real transcript, real sentiment, real predictions
+  demoState.liveTurns.push({ speaker: "shopper", text: english });
+  appendLiveTurn({
+    speaker: "shopper",
+    text: raw,
+    predictions,
+    sentiment: [sentimentLabel, `${Math.round((1 - frustration) * 100)}%`],
+    metrics: liveMetrics(frustration, false)
+  });
+  if (translation && translation.lang && !String(translation.lang).startsWith("en")) {
+    appendSystemTurn(
+      "Gemini translate",
+      `${english} (${sentimentLabel}, ${Math.round(frustration * 100)}% frustration${tags.length ? "; " + tags.join(", ") : ""})`
+    );
+  }
+  if (branch && branch.championStrategy) {
+    appendSystemTurn("preload", `Champion branch: ${branch.championStrategy}. Inventory and courier tools queued before the next reply.`);
+  }
+
+  // 3. Real, script-steered Gemini agent reply (persona drives baseline vs Gen-3 behaviour)
+  setVoiceStatus("live", "Agent responding");
+  const replyResp = await callAgentReply(english);
+  const agentText = (replyResp && replyResp.reply) || (branch && branch.agentResponse) || (contained
+    ? "I have checked local inventory and can reserve a replacement now with same-day courier, and your refund path stays open."
+    : "Our standard shipping policy is three to five business days; I can offer a discount but cannot guarantee tomorrow.");
+
+  demoState.liveTurns.push({ speaker: "agent", text: agentText });
   appendLiveTurn({
     speaker: "agent",
-    text: branch.agentResponse,
-    predictions: contained
-      ? [["accept replacement", 63], ["asks confirmation", 20], ["thanks agent", 12], ["recontact risk", 5]]
-      : [["cancel/refund threat", 45], ["human escalation", 23], ["tracking ask", 18], ["accept", 14]],
-    sentiment: contained ? ["recovering", "68%"] : ["worsening", "18%"],
-    metrics: contained ? ["78%", "61", "20%"] : ["38%", "26", "61%"],
-    system: contained ? "Tool preload completed before customer-facing policy language." : "Branch needs pruning after call."
+    text: agentText,
+    predictions,
+    sentiment: contained ? ["recovering", "70%"] : ["tense", `${Math.round((1 - frustration) * 100)}%`],
+    metrics: liveMetrics(frustration, contained),
+    system: contained ? "Inventory-first rescue offered before policy language." : "Policy-first branch — flagged for pruning after call."
   });
-  const tts = await callTtsProbe(branch.agentResponse);
+
+  // 4. Real TTS playback of the agent reply
+  const tts = await callTtsProbe(agentText);
   if (tts) playAudioFromData(tts.mime, tts.audioBase64);
+
   demoState.activeCall = contained ? "success" : "baseline";
-  setVoiceStatus("ready", "Live turn complete");
+  setVoiceStatus("ready", "Unmute the mic to reply");
   setPreload("tool preload: completed for selected branch", true);
 }
 
@@ -879,10 +927,29 @@ async function stopLiveMic() {
   setIconButton(micToggle, "micOff", "Start mic");
   waveform.classList.add("idle");
   setVoiceStatus("live", "Processing utterance");
-  const captured = demoState.liveOutputBuffer || demoState.liveInputBuffer;
+  // Gemini Live transcription arrives asynchronously after we stop sending audio.
+  // Wait for the final transcript to flush in instead of reading an empty buffer.
+  const captured = await waitForTranscript();
   demoState.liveInputBuffer = "";
   demoState.liveOutputBuffer = "";
   await handleLiveUtterance(captured);
+}
+
+// Poll the live transcription buffers until the text stops changing (final flush) or we hit the cap.
+function waitForTranscript(maxWaitMs = 2400, quietMs = 650) {
+  return new Promise((resolve) => {
+    const start = Date.now();
+    let lastText = (demoState.liveOutputBuffer || demoState.liveInputBuffer || "").trim();
+    let lastChange = Date.now();
+    const tick = () => {
+      const now = (demoState.liveOutputBuffer || demoState.liveInputBuffer || "").trim();
+      if (now !== lastText) { lastText = now; lastChange = Date.now(); }
+      const stable = lastText && Date.now() - lastChange >= quietMs;
+      if (stable || Date.now() - start >= maxWaitMs) { resolve(lastText); return; }
+      setTimeout(tick, 120);
+    };
+    tick();
+  });
 }
 
 async function toggleMic() {
@@ -996,24 +1063,26 @@ async function callTtsProbe(text) {
 }
 
 function identifyCaller(kind = "maya") {
-  const isSam = kind === "sam";
+  const isJohn = kind === "john";
   liveProfile.classList.add("identified");
   liveProfile.innerHTML = `
     <div class="profile-hero">
-      <span class="avatar large">${isSam ? "SP" : "MR"}</span>
-      <h2>${isSam ? "Sam P." : "Maya R."}</h2>
-      <p>Matched from caller ID, order history, loyalty profile, and active late-delivery intent.</p>
+      <span class="avatar large ${isJohn ? "blue" : ""}">${isJohn ? "JD" : "MR"}</span>
+      <h2>${isJohn ? "John D." : "Maya R."}</h2>
+      <p>${isJohn
+        ? "Anniversary dinner outfit delayed — urgent event deadline on the Gen-3 inventory-first playbook."
+        : "Daughter's birthday gift late — urgent family deadline on the baseline policy-first playbook."}</p>
     </div>
     <dl class="profile-grid">
       <div><dt>Mode</dt><dd>VIP parent</dd></div>
-      <div><dt>Risk</dt><dd>${isSam ? "Medium" : "High"}</dd></div>
-      <div><dt>LTV</dt><dd>$2.4k</dd></div>
-      <div><dt>Prior issue</dt><dd>${isSam ? "Similar" : "Yes"}</dd></div>
+      <div><dt>Risk</dt><dd>${isJohn ? "Medium" : "High"}</dd></div>
+      <div><dt>LTV</dt><dd>${isJohn ? "$1.9k" : "$2.4k"}</dd></div>
+      <div><dt>Prior issue</dt><dd>${isJohn ? "Resolved" : "Yes"}</dd></div>
     </dl>
     <div class="mini-card">
       <span>Loaded playbook</span>
-      <strong>${isSam ? "policy_late_delivery_gen3" : "policy_late_delivery_gen1"}</strong>
-      <p>${isSam ? "Dream-updated deadline/inventory-first branch selected." : "Baseline policy-first branch active before dream pass."}</p>
+      <strong>${isJohn ? "policy_late_delivery_gen3" : "policy_late_delivery_gen1"}</strong>
+      <p>${isJohn ? "Dream-updated deadline/inventory-first branch active." : "Baseline policy-first branch active before dream pass."}</p>
     </div>
   `;
 }
@@ -1412,6 +1481,46 @@ voiceModeToggle.addEventListener("click", toggleVoiceMode);
 micToggle.addEventListener("click", toggleMic);
 seedCall.addEventListener("click", seedLiveCall);
 processCall.addEventListener("click", processCurrentCall);
+
+// ── Persona flow tabs (Maya frustrated / John contained) ──
+const personaTabs = [...document.querySelectorAll(".persona-tab")];
+
+function resetLiveCall() {
+  if (demoState.micHandle) { demoState.micHandle.stop(); demoState.micHandle = null; }
+  demoState.micActive = false;
+  micToggle.classList.remove("recording");
+  setIconButton(micToggle, "micOff", "Start mic");
+  waveform.classList.add("idle");
+  demoState.liveTurns = [];
+  demoState.liveInputBuffer = "";
+  demoState.liveOutputBuffer = "";
+  liveTranscript.innerHTML = "";
+  liveProfile.classList.remove("identified");
+  liveProfile.innerHTML = `
+    <div class="empty-profile">
+      <span>Awaiting caller identification</span>
+      <p>Start the mic to identify the caller, transcribe the voice stream, and route the live branch.</p>
+    </div>`;
+}
+
+function setActivePersona(persona) {
+  if (persona !== "maya" && persona !== "john") return;
+  demoState.activePersona = persona;
+  demoState.promoted = persona === "john";
+  demoState.activeCall = persona === "john" ? "success" : "baseline";
+  personaTabs.forEach((tab) => {
+    const on = tab.dataset.persona === persona;
+    tab.classList.toggle("active", on);
+    tab.setAttribute("aria-selected", String(on));
+  });
+  resetLiveCall();
+  identifyCaller(persona);
+  setVoiceStatus("ready", persona === "john"
+    ? "John — contained flow ready, unmute to talk"
+    : "Maya — frustrated flow ready, unmute to talk");
+}
+
+personaTabs.forEach((tab) => tab.addEventListener("click", () => setActivePersona(tab.dataset.persona)));
 document.querySelectorAll("[data-pruning-zoom]").forEach((item) => item.addEventListener("click", zoomToSelectedHistoryRun));
 document.querySelectorAll("[data-pruning-dream]").forEach((item) => item.addEventListener("click", () => {
   switchView("dream");

@@ -2039,3 +2039,38 @@ dd {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Live workspace persona tabs (Maya / John) ── */
+.persona-tabs {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-bottom: 14px;
+}
+.persona-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 96px;
+  padding: 9px 20px;
+  border: 1px solid #d9d5cb;
+  border-radius: 10px;
+  background: #faf9f6;
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+.persona-tab strong { font-size: 15px; font-weight: 800; }
+.persona-tab:hover { border-color: #b9b3a6; }
+.persona-tab.active[data-persona="maya"] {
+  border-color: rgba(183, 93, 85, 0.5);
+  background: #fbeceb;
+  box-shadow: inset 0 -2px 0 #b75d55;
+}
+.persona-tab.active[data-persona="maya"] small { color: #b75d55; }
+.persona-tab.active[data-persona="john"] {
+  border-color: rgba(47, 125, 87, 0.5);
+  background: var(--green-soft);
+  box-shadow: inset 0 -2px 0 var(--green);
+}
+.persona-tab.active[data-persona="john"] small { color: var(--green); }

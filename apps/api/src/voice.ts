@@ -144,6 +144,57 @@ Use at most ${gen.maxCandidates ?? 5} candidates.`;
   }
 }
 
+// ---------------------------------------------------------------------------
+// Conversational agent reply — a REAL Gemini response steered to follow the
+// Golden-script arc per persona (not verbatim). Used by the ui-final live demo.
+//   persona "maya" -> baseline policy-first agent (leads to frustration)
+//   persona "john" -> Gen-3 inventory-first agent (leads to containment)
+// ---------------------------------------------------------------------------
+const AGENT_BRIEF_BASELINE = `You are a retail customer-support voice agent running the BASELINE (pre-improvement) playbook for a late-delivery issue.
+Behaviour: you are polite but you LEAD WITH POLICY. Briefly acknowledge the feeling, then fall back on standard shipping policy (three to five business days) and carrier processing rules. Do NOT proactively check replacement inventory or courier options. At most offer a small goodwill discount (e.g. ten percent off a future order). You cannot guarantee the deadline. This branch is known to leave urgent-deadline customers frustrated — stay in character; do not rescue them.
+Reply in ONE or TWO natural spoken sentences. No markdown, no quotes, no stage directions — only the words the agent says.`;
+
+const AGENT_BRIEF_GEN3 = `You are a retail customer-support voice agent running the GEN-3 improved playbook for an urgent late-delivery issue.
+Behaviour: you LEAD WITH RESCUE. Acknowledge the event deadline first, then tell the customer you have already checked local replacement inventory and courier options and can reserve a replacement now and upgrade it to same-day courier. Reassure that the refund path stays open as a backup. Be warm, concrete, and confident.
+Reply in ONE or TWO natural spoken sentences. No markdown, no quotes, no stage directions — only the words the agent says.`;
+
+function fallbackAgentReply(baseline: boolean): string {
+  return baseline
+    ? 'I understand the timing is frustrating. Our standard shipping policy is three to five business days, and I can offer ten percent off a future order, but I cannot guarantee delivery tomorrow.'
+    : 'I hear the deadline. I have already checked local inventory and there is a replacement nearby — I can reserve it now and upgrade to same-day courier, and your refund path stays open if anything misses.';
+}
+
+export async function generateAgentReply(args: {
+  transcript: string;
+  persona?: string;
+  history?: Array<{ speaker?: string; text?: string }>;
+}): Promise<{ reply: string }> {
+  const baseline = (args.persona || 'john').toLowerCase() === 'maya';
+  const history = (args.history || [])
+    .filter((t) => t && t.text)
+    .slice(-6)
+    .map((t) => `${t.speaker === 'agent' ? 'Agent' : 'Customer'}: ${t.text}`)
+    .join('\n');
+
+  const prompt = `Conversation so far:
+${history || '(this is the first agent turn)'}
+
+The customer just said: "${args.transcript}"
+
+Respond now as the agent.`;
+
+  try {
+    const raw = await generateContent(prompt, {
+      systemInstruction: baseline ? AGENT_BRIEF_BASELINE : AGENT_BRIEF_GEN3
+    });
+    const reply = String(raw || '').replace(/^["'\s]+|["'\s]+$/g, '').trim();
+    return { reply: reply || fallbackAgentReply(baseline) };
+  } catch (e) {
+    console.warn('Agent reply fallback:', e);
+    return { reply: fallbackAgentReply(baseline) };
+  }
+}
+
 async function synthesizeElevenLabs(text: string): Promise<TtsResult> {
   const env = getVoiceEnv();
   if (!env.elevenKey) throw new Error('ELEVENLABS_API_KEY not set');

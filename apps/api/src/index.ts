@@ -30,6 +30,7 @@ import {
   createLiveKitToken,
   detectAndTranslate,
   generateBranches,
+  generateAgentReply,
   synthesizeTts
 } from './voice.js';
 
@@ -73,6 +74,18 @@ app.post('/api/tts', async (req, res) => {
     const { text, provider } = req.body as { text?: string; provider?: 'google' | 'elevenlabs' };
     if (!text) return res.status(400).json({ error: 'text required' });
     res.json(await synthesizeTts(text, provider));
+  } catch (e: any) {
+    res.status(500).json({ error: e.message || String(e) });
+  }
+});
+
+app.post('/api/agent-reply', async (req, res) => {
+  try {
+    const { transcript, persona, history } = req.body as {
+      transcript?: string; persona?: string; history?: Array<{ speaker?: string; text?: string }>;
+    };
+    if (!transcript) return res.status(400).json({ error: 'transcript required' });
+    res.json(await generateAgentReply({ transcript, persona, history }));
   } catch (e: any) {
     res.status(500).json({ error: e.message || String(e) });
   }
