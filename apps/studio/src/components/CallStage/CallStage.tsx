@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useRunStore } from "../../state/runStore.js";
-import { startDemo2Pipeline } from "../../lib/voicePipeline.js";
+import { startPipeline } from "../../lib/voicePipeline.js";
 import { TranscriptTurn } from "./TranscriptTurn.js";
 import { Waveform } from "./Waveform.js";
 
@@ -11,7 +11,7 @@ export function CallStage() {
 
   useEffect(() => {
     if (callStatusLive === "live" && !stopRef.current) {
-      startDemo2Pipeline().then((stop) => {
+      startPipeline().then((stop) => {
         stopRef.current = stop;
       });
     }
