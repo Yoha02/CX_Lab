@@ -14,4 +14,9 @@ describe("runStore", () => {
     useRunStore.getState().reset();
     expect(useRunStore.getState().turns).toHaveLength(0);
   });
+  it("reset keeps the active iteration", () => {
+    useRunStore.getState().setActiveIteration(1);
+    useRunStore.getState().reset();
+    expect(useRunStore.getState().activeIterationIndex).toBe(1);
+  });
 });
