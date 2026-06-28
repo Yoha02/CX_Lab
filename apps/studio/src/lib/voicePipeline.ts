@@ -1,6 +1,8 @@
 import { startMicCapture, playAudioFromData, type MicHandle } from "./audio.js";
 import { openLiveSocket, type LiveSocket } from "./liveSocket.js";
+import { streamBranches } from "./branchSocket.js";
 import { useRunStore } from "../state/runStore.js";
+import { getDataSource } from "../data/index.js";
 
 export async function startDemo2Pipeline(): Promise<() => void> {
   let mic: MicHandle | null = null;
@@ -35,23 +37,41 @@ export async function startDemo2Pipeline(): Promise<() => void> {
             : t
         );
       useRunStore.setState({ turns });
-      const reply =
-        "Thanks — I hear you. Let me check what I can do about that right now.";
-      const agentId = ++turnId;
-      useRunStore.getState().addTurn({
-        turn_id: agentId,
-        speaker: "agent",
-        original: reply,
-        english: reply,
-        lang: "en-US",
-      });
-      const tts = await fetch("/api/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: reply, provider: "google" }),
-      });
-      const audio = await tts.json();
-      if (audio.audioBase64) await playAudioFromData(audio.mime, audio.audioBase64);
+      const profile = await getDataSource(useRunStore.getState().displayMode).getProfile();
+      useRunStore.getState().clearBranch();
+      streamBranches(
+        {
+          englishTranscript: d.english,
+          ctx: {
+            shopperMode: profile?.shopper_mode ?? "Shopper",
+            badges: profile?.badges ?? [],
+            intent: "late_delivery",
+            situationTags: ["urgent_event_deadline", "gift_order"],
+          },
+          gen: { model: "gemini-2.5-flash", maxCandidates: 3 },
+        },
+        {
+          onCandidate: (c) => useRunStore.getState().addCandidate(c),
+          onChampion: async (_strategy, agentResponse) => {
+            useRunStore.getState().addTurn({
+              turn_id: ++turnId,
+              speaker: "agent",
+              original: agentResponse,
+              english: agentResponse,
+              lang: "en-US",
+            });
+            const tts = await fetch("/api/tts", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ text: agentResponse, provider: "google" }),
+            });
+            const audio = await tts.json();
+            if (audio.audioBase64) await playAudioFromData(audio.mime, audio.audioBase64);
+          },
+          onError: (m) => console.warn("branch error", m),
+          onDone: () => useRunStore.getState().commitBranchFrame(),
+        },
+      );
     } catch (e) {
       console.error("pipeline error", e);
     }
