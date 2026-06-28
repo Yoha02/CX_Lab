@@ -288,10 +288,6 @@ h3 {
   width: min(720px, 100%);
 }
 
-body:not(.nav-collapsed) .home-canvas {
-  transform: translateX(-80px);
-}
-
 .welcome-panel {
   padding: 10px 4px 18px;
 }
@@ -378,13 +374,16 @@ body:not(.nav-collapsed) .home-canvas {
 }
 
 .full-history-link span {
-  display: grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 21px;
   height: 21px;
   border-radius: 999px;
   background: var(--blue-soft);
+  line-height: 1;
   font-weight: 900;
+  transform: translateY(-1px);
 }
 
 #personasView {
@@ -1276,6 +1275,12 @@ dd {
   }
   50% {
     height: 58px;
+  }
+}
+
+@media (min-width: 1400px) {
+  body:not(.nav-collapsed) .home-canvas {
+    transform: translateX(-80px);
   }
 }
 
