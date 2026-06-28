@@ -562,7 +562,16 @@ function zoomToSelectedHistoryRun() {
 
 navCollapse.addEventListener("click", () => setNavCollapsed(!document.body.classList.contains("nav-collapsed")));
 
-navItems.forEach((item) => item.addEventListener("click", () => switchView(item.dataset.view)));
+brandMark.addEventListener("click", () => {
+  switchView("home");
+  setNavCollapsed(false);
+});
+
+navItems.forEach((item) => item.addEventListener("click", () => {
+  const view = item.dataset.view;
+  switchView(view);
+  setNavCollapsed(view !== "home");
+}));
 document.querySelectorAll("[data-view-target]").forEach((item) => item.addEventListener("click", () => {
   switchView(item.dataset.viewTarget);
   if (item.dataset.viewTarget === "personas" || item.dataset.viewTarget === "analytics") {

@@ -105,10 +105,18 @@ p {
   width: 100%;
   height: 46px;
   margin: 0 auto 12px;
+  border: 0;
   border-radius: 8px;
   background: var(--ink);
   color: white;
+  cursor: pointer;
+  font: inherit;
   font-weight: 900;
+}
+
+.mark:focus-visible {
+  outline: 3px solid rgba(63, 124, 172, 0.36);
+  outline-offset: 3px;
 }
 
 .nav-item {
