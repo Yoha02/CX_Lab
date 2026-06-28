@@ -5,6 +5,7 @@ import { CallStage } from "./components/CallStage/CallStage.js";
 import { BranchTree } from "./components/BranchTree/BranchTree.js";
 import { PredictionPanel } from "./components/PredictionPanel/PredictionPanel.js";
 import { MetricsRow } from "./components/MetricsRow/MetricsRow.js";
+import { DreamPanel } from "./components/DreamPanel/DreamPanel.js";
 import { useRunStore } from "./state/runStore.js";
 import { fetchIterations } from "./state/iterations.js";
 
@@ -25,6 +26,7 @@ export default function App() {
         </main>
         <section id="branch-tree-slot" className="p-4 overflow-y-auto">
           <BranchTree />
+          <DreamPanel />
         </section>
       </div>
     </div>
