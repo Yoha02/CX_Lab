@@ -5,6 +5,7 @@ import { selectTts } from "./providers/tts/index.js";
 import { detectAndTranslate } from "./providers/translate.js";
 import { attachGeminiLive } from "./providers/voice/geminiLive.js";
 import { createLiveKitToken } from "./providers/voice/livekit.js";
+import { ITERATIONS } from "./config/iterations.js";
 import { env } from "./lib/env.js";
 
 const app = express();
@@ -38,6 +39,8 @@ app.get("/api/livekit/token", async (req, res) => {
     res.json({ url: env.livekitUrl, token });
   } catch (e: any) { res.status(500).json({ error: e.message }); }
 });
+
+app.get("/api/iterations", (_req, res) => res.json(ITERATIONS));
 
 const server = createServer(app);
 const wss = new WebSocketServer({ noServer: true });
