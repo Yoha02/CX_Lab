@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Turn } from "../lib/contracts.js";
+import type { Turn, Candidate } from "../lib/contracts.js";
 
 type CallStatus = "idle" | "connecting" | "live" | "paused";
 
@@ -8,10 +8,15 @@ interface RunState {
   callStatus: CallStatus;
   activeIterationIndex: number;
   turns: Turn[];
+  branchCandidates: Candidate[];
+  lastGoodCandidates: Candidate[];
   toggleDisplayMode(): void;
   setCallStatus(s: CallStatus): void;
   setActiveIteration(i: number): void;
   addTurn(t: Turn): void;
+  addCandidate(c: Candidate): void;
+  commitBranchFrame(): void;
+  clearBranch(): void;
   reset(): void;
 }
 
@@ -20,9 +25,17 @@ export const useRunStore = create<RunState>((set) => ({
   callStatus: "idle",
   activeIterationIndex: 0,
   turns: [],
+  branchCandidates: [],
+  lastGoodCandidates: [],
   toggleDisplayMode: () => set((s) => ({ displayMode: !s.displayMode })),
   setCallStatus: (callStatus) => set({ callStatus }),
   setActiveIteration: (activeIterationIndex) => set({ activeIterationIndex }),
   addTurn: (t) => set((s) => ({ turns: [...s.turns, t] })),
-  reset: () => set({ callStatus: "idle", turns: [] }),
+  addCandidate: (c) => set((s) => ({ branchCandidates: [...s.branchCandidates, c] })),
+  commitBranchFrame: () =>
+    set((s) => ({
+      lastGoodCandidates: s.branchCandidates.length ? s.branchCandidates : s.lastGoodCandidates,
+    })),
+  clearBranch: () => set({ branchCandidates: [] }),
+  reset: () => set({ callStatus: "idle", turns: [], branchCandidates: [] }),
 }));

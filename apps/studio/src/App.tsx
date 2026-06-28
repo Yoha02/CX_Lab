@@ -1,6 +1,7 @@
 import { TopBar } from "./components/TopBar/TopBar.js";
 import { SideRail } from "./components/SideRail/SideRail.js";
 import { CallStage } from "./components/CallStage/CallStage.js";
+import { BranchTree } from "./components/BranchTree/BranchTree.js";
 import { useRunStore } from "./state/runStore.js";
 
 export default function App() {
@@ -14,7 +15,7 @@ export default function App() {
           <CallStage />
         </main>
         <section id="branch-tree-slot" className="p-4 overflow-y-auto">
-          <div className="text-muted text-sm">branch tree — Plan 04</div>
+          <BranchTree />
         </section>
       </div>
     </div>
