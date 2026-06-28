@@ -77,11 +77,13 @@ p {
 }
 
 .nav-collapse {
-  display: grid;
-  place-items: center;
-  gap: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   margin-top: auto;
-  min-height: 58px;
+  min-height: 44px;
+  padding: 0 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel-soft);
@@ -93,7 +95,7 @@ p {
 
 .collapse-arrows {
   color: var(--blue);
-  font-size: 15px;
+  font-size: 14px;
   letter-spacing: 1px;
 }
 
@@ -101,7 +103,7 @@ p {
   display: grid;
   place-items: center;
   width: 100%;
-  height: 54px;
+  height: 46px;
   margin: 0 auto 12px;
   border-radius: 8px;
   background: var(--ink);
@@ -113,9 +115,9 @@ p {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 12px;
-  min-height: 64px;
-  padding: 0 14px;
+  gap: 10px;
+  min-height: 50px;
+  padding: 0 12px;
   border-radius: 8px;
   background: transparent;
   cursor: pointer;
@@ -125,8 +127,8 @@ p {
 .nav-item span {
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
+  width: 32px;
+  height: 32px;
   flex: 0 0 auto;
   border-radius: 8px;
   background: var(--panel-soft);
@@ -137,7 +139,7 @@ p {
 
 .nav-item strong {
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .nav-item.active {
@@ -158,10 +160,13 @@ p {
 }
 
 .nav-collapsed .nav-item {
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
   gap: 5px;
-  padding: 0;
+  min-height: 72px;
+  padding: 0 4px;
   text-align: center;
 }
 
@@ -172,10 +177,18 @@ p {
 
 .nav-collapsed .nav-item strong {
   font-size: 10px;
+  line-height: 1.15;
 }
 
 .nav-collapsed .nav-collapse strong {
   font-size: 10px;
+  line-height: 1.15;
+}
+
+.nav-collapsed .nav-collapse {
+  flex-direction: column;
+  min-height: 58px;
+  padding: 6px 4px;
 }
 
 .workspace {
@@ -272,25 +285,39 @@ h3 {
 .home-canvas {
   display: grid;
   gap: 22px;
-  width: min(820px, 100%);
+  width: min(720px, 100%);
+}
+
+body:not(.nav-collapsed) .home-canvas {
+  transform: translateX(-80px);
 }
 
 .welcome-panel {
   padding: 10px 4px 18px;
 }
 
-.welcome-panel h2 {
-  max-width: 740px;
-  font-size: clamp(36px, 5vw, 60px);
-  line-height: 1.02;
+.welcome-panel h1 {
+  max-width: 720px;
+  color: var(--ink);
+  font-size: clamp(48px, 5.8vw, 74px);
+  line-height: 0.98;
 }
 
-.welcome-panel p {
+.welcome-panel h2 {
   max-width: 680px;
-  margin-top: 20px;
+  margin-top: 18px;
+  color: var(--ink);
+  font-size: clamp(27px, 3vw, 38px);
+  line-height: 1.05;
+}
+
+.welcome-panel h3 {
+  max-width: 700px;
+  margin-top: 16px;
   color: var(--muted);
-  font-size: 18px;
-  line-height: 1.55;
+  font-size: clamp(17px, 1.5vw, 22px);
+  font-weight: 500;
+  line-height: 1.45;
 }
 
 .recent-panel {
@@ -336,6 +363,28 @@ h3 {
 .recent-row b {
   color: var(--blue);
   font-size: 13px;
+}
+
+.full-history-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 4px 2px;
+  background: transparent;
+  color: var(--blue);
+  cursor: pointer;
+  font-weight: 850;
+}
+
+.full-history-link span {
+  display: grid;
+  place-items: center;
+  width: 21px;
+  height: 21px;
+  border-radius: 999px;
+  background: var(--blue-soft);
+  font-weight: 900;
 }
 
 #personasView {
