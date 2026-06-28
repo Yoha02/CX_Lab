@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CX_lab Dojo - Prototype Four</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="platform-shell">
+    <aside class="app-nav" aria-label="Primary navigation">
+      <div class="mark" id="brandMark">CX LAB</div>
+      <button class="nav-item active" data-view="home" type="button"><span>HM</span><strong>Home</strong></button>
+      <button class="nav-item" data-view="personas" type="button"><span>PE</span><strong>Personas</strong></button>
+      <button class="nav-item" data-view="history" type="button"><span>HI</span><strong>History</strong></button>
+      <button class="nav-item" data-view="live" type="button"><span>LC</span><strong>Live call</strong></button>
+      <button class="nav-item" data-view="pruning" type="button"><span>PR</span><strong>Pruning</strong></button>
+      <button class="nav-item" data-view="dream" type="button"><span>DR</span><strong>Dream pass</strong></button>
+      <button class="nav-item" data-view="analytics" type="button"><span>AN</span><strong>Analytics</strong></button>
+      <button class="nav-collapse" id="navCollapse" type="button" aria-expanded="true">
+        <span class="collapse-arrows">&lt;&lt;</span>
+        <strong>Hide nav</strong>
+      </button>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">CX_lab Dojo</div>
+          <h1 id="pageTitle">Persona experiment canvas</h1>
+        </div>
+        <div class="top-actions">
+          <button class="ghost-btn" id="resetDemo" type="button">Reset demo</button>
+          <button class="primary-btn" id="primaryAction" type="button">Generate 128 arms</button>
+        </div>
+      </header>
+
+      <section class="content-view active" id="homeView" data-view="home">
+        <div class="home-canvas">
+          <section class="welcome-panel">
+            <h1>Welcome to CX Lab</h1>
+            <h2>Your CX dojo for agent training and experimenting.</h2>
+            <h3>Design persona-specific experiments, replay voice interactions, prune weak branches, and promote the next best containment strategy.</h3>
+          </section>
+
+          <section class="recent-panel">
+            <div class="section-head">
+              <div>
+                <h3>Recent persona runs</h3>
+              </div>
+            </div>
+            <div class="recent-list">
+              <button class="recent-row" data-view-target="history" type="button">
+                <span class="avatar">MR</span>
+                <span><strong>Maya R.</strong><small>VIP parent - urgent birthday delivery</small></span>
+                <b>History</b>
+              </button>
+              <button class="recent-row" data-view-target="history" type="button">
+                <span class="avatar blue">AX</span>
+                <span><strong>Alex T.</strong><small>First-time buyer - anniversary outfit delayed</small></span>
+                <b>History</b>
+              </button>
+              <button class="recent-row" data-view-target="history" type="button">
+                <span class="avatar amber">JD</span>
+                <span><strong>Jordan K.</strong><small>Value seeker - graduation present late</small></span>
+                <b>History</b>
+              </button>
+            </div>
+            <button class="full-history-link" data-view-target="history" type="button"><span>+</span> See full history</button>
+          </section>
+        </div>
+      </section>
+
+      <section class="content-view" id="personasView" data-view="personas">
+        <aside class="left-panel">
+          <div class="panel-title">
+            <span>Persona library</span>
+            <strong>3 archetypes</strong>
+          </div>
+          <button class="persona-row active" data-persona="vip-parent" type="button">
+            <span class="avatar">VP</span>
+            <span><strong>VIP parent</strong><small>High LTV, family deadline, relationship sensitive</small></span>
+          </button>
+          <button class="persona-row" data-persona="first-time-buyer" type="button">
+            <span class="avatar blue">FT</span>
+            <span><strong>First-time buyer</strong><small>Trust building, confirmation-heavy, low history</small></span>
+          </button>
+          <button class="persona-row" data-persona="value-seeker" type="button">
+            <span class="avatar amber">VS</span>
+            <span><strong>Value seeker</strong><small>Price protection, refunds, coupon sensitivity</small></span>
+          </button>
+          <div class="mini-card">
+            <span>Planning mode</span>
+            <strong>Draft experiment space</strong>
+            <p>Persona roots expand into strategy families and child arms before any customer call has run.</p>
+          </div>
+        </aside>
+
+        <section class="canvas-wrap">
+          <div class="canvas-toolbar">
+            <div>
+              <span class="badge green">128 planned arms</span>
+              <span class="badge">10 strategy families</span>
+              <span class="badge blue">0 calls run</span>
+              <span class="badge">awaiting evidence</span>
+            </div>
+            <div>
+              <button class="small-btn" id="collapseNodes" type="button">Collapse</button>
+              <button class="small-btn" id="expandNodes" type="button">Expand visible</button>
+              <button class="small-btn dark" id="createExperiment" type="button">Create experiment</button>
+            </div>
+          </div>
+          <div class="experiment-canvas" id="experimentCanvas" aria-label="Experiment node canvas"></div>
+        </section>
+
+        <aside class="right-panel">
+          <div class="panel-title">
+            <span>Inspector</span>
+            <strong id="inspectorStatus">planning root</strong>
+          </div>
+          <div id="inspectorBody" class="inspector-body"></div>
+        </aside>
+      </section>
+
+      <section class="content-view" id="historyView" data-view="history">
+        <section class="history-main">
+          <div class="history-tabs">
+            <button class="history-tab active" data-history-tab="runs" type="button">Runs</button>
+            <button class="history-tab" data-history-tab="details" type="button">Details</button>
+          </div>
+
+          <div class="history-panel active" data-history-panel="runs">
+            <div class="history-runs-layout">
+              <aside class="history-run-sidebar">
+                <div class="panel-title">
+                  <span>Recent runs</span>
+                  <strong>3 mapped users</strong>
+                </div>
+                <div class="history-run-list">
+                  <article class="history-run-row selected">
+                    <span class="avatar">MR</span>
+                    <div>
+                      <strong>Maya R.</strong>
+                      <p>VIP parent - late birthday gift</p>
+                      <small>39% containment - not contained</small>
+                    </div>
+                    <button class="small-btn dark" data-history-detail type="button">Details</button>
+                  </article>
+                  <article class="history-run-row">
+                    <span class="avatar blue">AX</span>
+                    <div>
+                      <strong>Alex T.</strong>
+                      <p>First-time buyer - anniversary outfit</p>
+                      <small>42% containment - escalated</small>
+                    </div>
+                    <button class="small-btn" data-history-detail type="button">Details</button>
+                  </article>
+                  <article class="history-run-row">
+                    <span class="avatar amber">JD</span>
+                    <div>
+                      <strong>Jordan K.</strong>
+                      <p>Value seeker - graduation present</p>
+                      <small>48% containment - refund demand</small>
+                    </div>
+                    <button class="small-btn" data-history-detail type="button">Details</button>
+                  </article>
+                </div>
+                <div class="mini-card">
+                  <span>Selected run</span>
+                  <strong>Maya R. / policy-first branch</strong>
+                  <p>The highlighted child node in the active experiment tree opens this run's detail view.</p>
+                </div>
+              </aside>
+
+              <section class="history-experiment-panel">
+                <div class="canvas-toolbar history-canvas-toolbar">
+                  <div>
+                    <span class="badge green">active experiment map</span>
+                    <span class="badge">36 related runs</span>
+                    <span class="badge blue">Maya selected</span>
+                    <span class="badge red">failure branch</span>
+                  </div>
+                  <button class="small-btn dark" data-history-detail type="button">Open selected details</button>
+                </div>
+                <div class="experiment-canvas history-experiment-canvas" id="historyExperimentCanvas" aria-label="History experiment tree"></div>
+              </section>
+            </div>
+          </div>
+
+          <div class="history-panel" data-history-panel="details">
+            <div class="history-detail-layout">
+              <aside class="persona-detail history-details-panel">
+                <button class="collapse-btn" type="button">Collapse nav</button>
+                <div class="profile-hero">
+                  <span class="avatar large">MR</span>
+                  <h2>Maya R.</h2>
+                  <p>Gold loyalty shopper mapped to VIP parent persona. Birthday gift deadline. Prior unresolved ticket.</p>
+                </div>
+                <dl class="profile-grid">
+                  <div><dt>LTV</dt><dd>$2.4k</dd></div>
+                  <div><dt>Risk</dt><dd>High</dd></div>
+                  <div><dt>Mode</dt><dd>VIP parent</dd></div>
+                  <div><dt>Need</dt><dd>Gift by Sat</dd></div>
+                </dl>
+                <div class="mini-card">
+                  <span>Mapped persona</span>
+                  <strong>VIP parent</strong>
+                  <p>Matched from loyalty status, family deadline language, order history, and prior issue risk.</p>
+                </div>
+                <div class="mini-card">
+                  <span>Last failure cluster</span>
+                  <strong>urgent event deadline</strong>
+                  <p>Policy-first response produced a cancel/refund threat.</p>
+                </div>
+              </aside>
+
+              <div class="history-detail-main">
+                <div class="history-grid">
+                  <article class="experiment-detail selected">
+                    <span>Observed branch</span>
+                    <h3>policy_first_shipping_explanation_v1</h3>
+                    <p>Agent explained shipping windows before checking rescue inventory.</p>
+                    <div class="score-line"><span>Containment</span><strong>39%</strong></div>
+                    <div class="score-line"><span>NPS proxy</span><strong>24</strong></div>
+                    <button class="small-btn dark" data-history-detail type="button">View transcript</button>
+                  </article>
+                  <article class="experiment-detail">
+                    <span>Proposed update</span>
+                    <h3>deadline_inventory_first_v1</h3>
+                    <p>Acknowledge deadline, look up inventory, preserve refund fallback.</p>
+                    <div class="score-line"><span>Expected containment</span><strong>81%</strong></div>
+                    <div class="score-line"><span>NPS proxy</span><strong>68</strong></div>
+                  </article>
+                  <article class="experiment-detail">
+                    <span>Held-out branch</span>
+                    <h3>overnight_offer_v2</h3>
+                    <p>Works when inventory exists but customer is price sensitive.</p>
+                    <div class="score-line"><span>Expected containment</span><strong>68%</strong></div>
+                    <div class="score-line"><span>NPS proxy</span><strong>49</strong></div>
+                  </article>
+                </div>
+
+                <div class="conversation-and-map">
+                  <div class="transcript-card">
+                    <div class="panel-title"><span>Previous transcript</span><strong>not contained</strong></div>
+                    <div class="transcript static">
+                      <article class="turn shopper"><span>Maya</span><p>My daughter's birthday is tomorrow and this still has not arrived.</p></article>
+                      <article class="turn agent"><span>Agent</span><p>Standard shipping usually takes 3-5 business days.</p></article>
+                      <article class="turn shopper"><span>Maya</span><p>No puedo seguir explicando esto. Just cancel it.</p></article>
+                      <article class="turn system"><span>Gemini translate</span><p>I cannot keep explaining this. Signal: frustration spike + urgent family event.</p></article>
+                    </div>
+                  </div>
+                  <div class="mini-map-card">
+                    <div class="panel-title"><span>Prune / promote</span><strong>last conversation</strong></div>
+                    <svg viewBox="0 0 560 260" class="mini-flow" aria-label="Prune promote map">
+                      <path class="flow good" d="M70 130 C170 50, 280 58, 410 75" />
+                      <path class="flow keep" d="M70 130 C180 135, 280 135, 410 130" />
+                      <path class="flow bad" d="M70 130 C180 205, 290 210, 410 195" />
+                      <g class="flow-node root" transform="translate(70 130)"><circle r="28"></circle><text y="5">late</text></g>
+                      <g class="flow-node good" transform="translate(410 75)"><circle r="32"></circle><text y="4">inventory</text></g>
+                      <g class="flow-node keep" transform="translate(410 130)"><circle r="28"></circle><text y="4">offer</text></g>
+                      <g class="flow-node bad" transform="translate(410 195)"><circle r="28"></circle><text y="4">policy</text></g>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="content-view" id="liveView" data-view="live">
+        <aside class="live-profile" id="liveProfile">
+          <div class="empty-profile">
+            <span>Awaiting caller identification</span>
+            <p>LiveKit audio is simulated here. Persona will populate after greeting.</p>
+          </div>
+        </aside>
+        <section class="live-console">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Live experiment</span>
+              <h2 id="liveTitle">Voice containment workspace</h2>
+            </div>
+            <div class="top-actions">
+              <button class="ghost-btn" id="seedCall" type="button">Seed mock call</button>
+              <button class="primary-btn" id="processCall" type="button">Process call</button>
+            </div>
+          </div>
+          <div class="voice-stage">
+            <div class="waveform" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="transcript live" id="liveTranscript"></div>
+          </div>
+        </section>
+        <aside class="prediction-panel">
+          <div class="panel-title"><span>Before shopper speaks</span><strong>next intent</strong></div>
+          <div id="predictionBars" class="prediction-bars"></div>
+          <div class="sentiment-meter">
+            <span>Sentiment</span>
+            <strong id="sentimentValue">neutral</strong>
+            <div><b id="sentimentFill"></b></div>
+          </div>
+          <div class="metrics-stack">
+            <div><span>Containment</span><strong id="liveContainment">52%</strong></div>
+            <div><span>NPS proxy</span><strong id="liveNps">31</strong></div>
+            <div><span>Recontact risk</span><strong id="liveRisk">42%</strong></div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="content-view" id="pruningView" data-view="pruning">
+        <div class="wide-panel">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Call evaluation</span>
+              <h2>What gets kept, pruned, and sent to dream state</h2>
+            </div>
+            <button class="primary-btn" data-pruning-dream type="button">Run dream pass</button>
+          </div>
+          <div class="prune-grid">
+            <article class="prune-card keep"><span>Keep</span><h3>Urgent event signal</h3><p>Deadline and frustration markers are retained as cluster evidence.</p></article>
+            <article class="prune-card keep"><span>Keep</span><h3>Translation signal</h3><p>Spanish frustration phrase maps to high-risk sentiment movement.</p></article>
+            <article class="prune-card prune"><span>Prune</span><h3>Policy-first opening</h3><p>Repeatedly increases cancel/refund threats before rescue options.</p></article>
+            <article class="prune-card promote"><span>Promote</span><h3>Inventory-first recovery</h3><p>Best candidate for Maya-like urgent delivery calls.</p></article>
+          </div>
+          <div class="evidence-strip">
+            <div><span>Prediction quality</span><strong>70%</strong></div>
+            <div><span>Sentiment delta</span><strong>-0.57</strong></div>
+            <div><span>NPS proxy</span><strong>24</strong></div>
+            <div><span>Pruning decision</span><strong>soft prune</strong></div>
+          </div>
+          <div class="pruning-flow-card">
+            <div class="panel-title">
+              <span>Prune / promote flow</span>
+              <strong>Maya R. - last conversation</strong>
+            </div>
+            <div class="pruning-flow-layout">
+              <svg viewBox="0 0 680 300" class="pruning-flow" aria-label="Prune promote flow">
+                <path class="flow good" d="M90 150 C205 52, 345 54, 520 78" />
+                <path class="flow keep" d="M90 150 C224 142, 350 140, 520 150" />
+                <path class="flow bad" d="M90 150 C210 235, 350 236, 520 222" />
+                <g class="flow-node root" transform="translate(90 150)"><circle r="34"></circle><text y="5">late</text></g>
+                <g class="flow-node good" transform="translate(520 78)"><circle r="38"></circle><text y="4">inventory</text></g>
+                <g class="flow-node keep" transform="translate(520 150)"><circle r="34"></circle><text y="4">offer</text></g>
+                <g class="flow-node bad" transform="translate(520 222)"><circle r="34"></circle><text y="4">policy</text></g>
+              </svg>
+              <div class="pruning-decisions">
+                <article class="decision-row promote">
+                  <span>Promote</span>
+                  <strong>inventory-first recovery</strong>
+                  <p>Open with deadline acknowledgement, then check replacement inventory before policy language.</p>
+                </article>
+                <article class="decision-row keep">
+                  <span>Keep</span>
+                  <strong>offer fallback</strong>
+                  <p>Preserve discount or refund fallback only after rescue options are clear.</p>
+                </article>
+                <article class="decision-row prune">
+                  <span>Prune</span>
+                  <strong>policy-first opening</strong>
+                  <p>Soft-pruned for Maya-like urgent event calls because it increased cancel/refund threats.</p>
+                </article>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-view" id="dreamView" data-view="dream">
+        <div class="wide-panel">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Offline consolidation</span>
+              <h2>Dream pass visual pipeline</h2>
+            </div>
+            <button class="primary-btn" id="runDream" type="button">Run dream pass</button>
+          </div>
+          <div class="dream-board" id="dreamBoard">
+            <article class="dream-column active"><span>1</span><h3>Cluster</h3><p>Group urgent-event late delivery calls across Maya, Alex, and Jordan.</p><strong>36 calls</strong></article>
+            <article class="dream-column"><span>2</span><h3>Diagnose</h3><p>Detect policy-first openings tied to sentiment collapse and refund threats.</p><strong>14 misses</strong></article>
+            <article class="dream-column"><span>3</span><h3>Patch</h3><p>Promote inventory-first recovery before policy explanation.</p><strong>candidate</strong></article>
+            <article class="dream-column"><span>4</span><h3>Validate</h3><p>Score containment, NPS proxy, and recontact risk on held-out calls.</p><strong>+19% lift</strong></article>
+            <article class="dream-column"><span>5</span><h3>Commit</h3><p>Update persona wording and shared late-delivery intent flow.</p><strong>Gen 2</strong></article>
+          </div>
+          <div class="sankey-card" id="dreamSankeyCard">
+            <div class="sankey-head">
+              <div>
+                <span class="eyebrow">Outcome redistribution</span>
+                <h3>Dream-updated late delivery playbook</h3>
+              </div>
+              <div class="sankey-legend" aria-label="Sankey legend">
+                <span><i class="green"></i>contained</span>
+                <span><i class="blue"></i>partial</span>
+                <span><i class="amber"></i>redirected</span>
+                <span><i class="red"></i>escalated</span>
+              </div>
+            </div>
+            <svg viewBox="0 0 1500 360" class="sankey" aria-label="Dream pass conversation outcome Sankey">
+              <defs>
+                <linearGradient id="sankeyGreen" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0" stop-color="#2f7d57" stop-opacity="0.16" />
+                  <stop offset="1" stop-color="#2f7d57" stop-opacity="0.36" />
+                </linearGradient>
+                <linearGradient id="sankeyBlue" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0" stop-color="#4d82b3" stop-opacity="0.13" />
+                  <stop offset="1" stop-color="#4d82b3" stop-opacity="0.31" />
+                </linearGradient>
+                <linearGradient id="sankeyAmber" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0" stop-color="#b8842f" stop-opacity="0.13" />
+                  <stop offset="1" stop-color="#b8842f" stop-opacity="0.31" />
+                </linearGradient>
+                <linearGradient id="sankeyRed" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0" stop-color="#b75d55" stop-opacity="0.11" />
+                  <stop offset="1" stop-color="#b75d55" stop-opacity="0.28" />
+                </linearGradient>
+              </defs>
+
+              <text class="sankey-section" x="92" y="50">Evidence cohort</text>
+              <text class="sankey-section" x="640" y="50">Dream patch</text>
+              <text class="sankey-section" x="1120" y="50">Projected next calls</text>
+
+              <rect class="sankey-node source-node" x="92" y="104" width="20" height="158" rx="7"></rect>
+              <text class="sankey-source-label" x="136" y="158">Urgent-event</text>
+              <text class="sankey-source-label sub" x="136" y="183">late delivery calls</text>
+              <text class="sankey-source-value" x="136" y="214">36 voice sessions</text>
+
+              <rect class="sankey-node patch-node" x="690" y="112" width="22" height="146" rx="7"></rect>
+              <text class="sankey-patch-label" x="732" y="161">inventory-first</text>
+              <text class="sankey-patch-label sub" x="732" y="185">playbook patch</text>
+              <text class="sankey-patch-value" x="732" y="214">promoted challenger</text>
+
+              <path class="sankey-link link-evidence" d="M112 184 C300 184, 505 184, 690 184" />
+              <path class="sankey-link link-contained" d="M712 142 C858 80, 988 76, 1110 78" />
+              <path class="sankey-link link-partial" d="M712 174 C860 168, 984 158, 1110 156" />
+              <path class="sankey-link link-redirected" d="M712 205 C862 226, 984 238, 1110 240" />
+              <path class="sankey-link link-escalated" d="M712 232 C862 290, 986 306, 1110 308" />
+
+              <rect class="sankey-node outcome green" x="1110" y="54" width="24" height="50" rx="7"></rect>
+              <rect class="sankey-node outcome blue" x="1110" y="134" width="24" height="44" rx="7"></rect>
+              <rect class="sankey-node outcome amber" x="1110" y="222" width="24" height="36" rx="7"></rect>
+              <rect class="sankey-node outcome red" x="1110" y="294" width="24" height="30" rx="7"></rect>
+
+              <text class="sankey-outcome-label green-label" x="1162" y="76">contained resolution</text>
+              <text class="sankey-outcome-value green" x="1162" y="101">21 calls, +29 pts</text>
+              <text class="sankey-outcome-label blue-label" x="1162" y="154">partial resolution</text>
+              <text class="sankey-outcome-value blue" x="1162" y="178">7 calls</text>
+              <text class="sankey-outcome-label amber-label" x="1162" y="238">redirected</text>
+              <text class="sankey-outcome-value amber" x="1162" y="262">4 calls</text>
+              <text class="sankey-outcome-label red-label" x="1162" y="308">escalated</text>
+              <text class="sankey-outcome-value red" x="1162" y="331">3 calls, -18 pts</text>
+            </svg>
+            <div class="sankey-metrics">
+              <article><span>Containment lift</span><strong>+19%</strong></article>
+              <article><span>NPS proxy</span><strong>24 -> 68</strong></article>
+              <article><span>Recontact risk</span><strong>42% -> 12%</strong></article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-view" id="analyticsView" data-view="analytics">
+        <div class="wide-panel">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Quality dashboard</span>
+              <h2>Advanced containment scorecard</h2>
+            </div>
+            <button class="primary-btn" data-view-target="live" type="button">Run next call</button>
+          </div>
+          <div class="analytics-grid">
+            <article><span>Total sessions</span><strong>213,323</strong><p>Retail voice and chat sample.</p></article>
+            <article><span>Advanced containment</span><strong>81%</strong><p>Resolved without human and low recontact risk.</p></article>
+            <article><span>Quality score</span><strong>84%</strong><p>Prediction, sentiment, tool timing, and NPS proxy.</p></article>
+            <article><span>Escalation rate</span><strong>12%</strong><p>Down after dream patch.</p></article>
+          </div>
+          <div class="run-table">
+            <div class="table-row head"><span>Experiment group</span><span>Avg containment</span><span>NPS proxy</span><span>Last run</span></div>
+            <div class="table-row"><span>deadline_inventory_first</span><span><b class="bar good"></b>81%</span><span>68</span><span>Gen 2 live</span></div>
+            <div class="table-row"><span>overnight_offer</span><span><b class="bar keep"></b>68%</span><span>49</span><span>Held out</span></div>
+            <div class="table-row"><span>policy_first_shipping</span><span><b class="bar bad"></b>39%</span><span>24</span><span>Pruned</span></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
