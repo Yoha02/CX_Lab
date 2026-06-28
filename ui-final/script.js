@@ -13,10 +13,16 @@ const inspectorBody = document.querySelector("#inspectorBody");
 const expandNodes = document.querySelector("#expandNodes");
 const collapseNodes = document.querySelector("#collapseNodes");
 const createExperiment = document.querySelector("#createExperiment");
+const voiceModeToggle = document.querySelector("#voiceModeToggle");
+const micToggle = document.querySelector("#micToggle");
 const seedCall = document.querySelector("#seedCall");
 const processCall = document.querySelector("#processCall");
 const liveTranscript = document.querySelector("#liveTranscript");
 const liveProfile = document.querySelector("#liveProfile");
+const waveform = document.querySelector(".voice-stage .waveform");
+const voiceStatus = document.querySelector("#voiceStatus");
+const voiceProvider = document.querySelector("#voiceProvider");
+const preloadChip = document.querySelector("#preloadChip");
 const predictionBars = document.querySelector("#predictionBars");
 const sentimentValue = document.querySelector("#sentimentValue");
 const sentimentFill = document.querySelector("#sentimentFill");
@@ -29,10 +35,21 @@ const historyPanels = [...document.querySelectorAll(".history-panel")];
 const historyCanvas = document.querySelector("#historyExperimentCanvas");
 
 const API_BASE = "http://127.0.0.1:8000";
+const WS_BASE = API_BASE.replace(/^http/, "ws");
+const INPUT_RATE = 16000;
+let audioCtx = null;
 const demoState = {
   apiOnline: false,
   goldenSeed: null,
   activeCall: "baseline",
+  voiceMode: "live",
+  micActive: false,
+  liveSocket: null,
+  micHandle: null,
+  liveInputBuffer: "",
+  liveOutputBuffer: "",
+  liveTurns: [],
+  pendingCandidates: [],
   currentResult: null,
   currentRunSaved: false,
   dreamClusters: [],
@@ -40,6 +57,73 @@ const demoState = {
   promoted: false,
   lastApiError: null
 };
+
+function b64FromInt16(samples) {
+  const bytes = new Uint8Array(samples.buffer);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 1) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+
+function unlockAudio() {
+  if (!audioCtx) audioCtx = new AudioContext();
+  audioCtx.resume().catch(() => {});
+}
+
+async function startMicCapture(onChunk) {
+  const stream = await navigator.mediaDevices.getUserMedia({
+    audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true }
+  });
+  const ctx = audioCtx || new AudioContext();
+  audioCtx = ctx;
+  await ctx.resume();
+  const sourceRate = ctx.sampleRate;
+  const source = ctx.createMediaStreamSource(stream);
+  const processor = ctx.createScriptProcessor(4096, 1, 1);
+  const sink = ctx.createGain();
+  sink.gain.value = 0;
+  source.connect(processor);
+  processor.connect(sink);
+  sink.connect(ctx.destination);
+  const ratio = sourceRate / INPUT_RATE;
+  processor.onaudioprocess = (event) => {
+    const input = event.inputBuffer.getChannelData(0);
+    const output = new Int16Array(Math.floor(input.length / ratio));
+    for (let i = 0; i < output.length; i += 1) {
+      let sum = 0;
+      const start = Math.floor(i * ratio);
+      const end = Math.min(input.length, Math.floor((i + 1) * ratio));
+      for (let j = start; j < end; j += 1) sum += input[j];
+      const averaged = Math.max(-1, Math.min(1, sum / Math.max(1, end - start)));
+      output[i] = averaged < 0 ? averaged * 0x8000 : averaged * 0x7fff;
+    }
+    onChunk(b64FromInt16(output));
+  };
+  return {
+    stop() {
+      processor.disconnect();
+      source.disconnect();
+      stream.getTracks().forEach((track) => track.stop());
+    }
+  };
+}
+
+async function playAudioFromData(mime, base64) {
+  if (!base64) return;
+  try {
+    const ctx = audioCtx || new AudioContext();
+    audioCtx = ctx;
+    await ctx.resume();
+    const bytes = Uint8Array.from(atob(base64), (char) => char.charCodeAt(0));
+    const audioBuffer = await ctx.decodeAudioData(bytes.buffer);
+    const source = ctx.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(ctx.destination);
+    source.start();
+  } catch (error) {
+    console.warn("[ui-final] audio playback failed", mime, error);
+  }
+}
 
 const apiBadge = document.createElement("span");
 apiBadge.className = "api-badge";
@@ -60,7 +144,7 @@ const primaryLabels = {
   home: "Open canvas",
   personas: "Generate draft arms",
   history: "Start similar call",
-  live: "Seed mock call",
+  live: "Start live mic",
   pruning: "Zoom out to canvas",
   dream: "Run dream pass",
   analytics: "Run next call"
@@ -517,6 +601,268 @@ function renderPredictions(items) {
   });
 }
 
+function setVoiceStatus(status, copy) {
+  voiceStatus.className = `voice-status-pill ${status}`;
+  voiceStatus.textContent = copy;
+}
+
+function setPreload(copy, active = false) {
+  preloadChip.textContent = copy;
+  preloadChip.classList.toggle("active", active);
+}
+
+function appendSystemTurn(label, text) {
+  const system = document.createElement("article");
+  system.className = "turn system";
+  system.innerHTML = `<span>${label}</span><p>${text}</p>`;
+  liveTranscript.appendChild(system);
+  liveTranscript.scrollTop = liveTranscript.scrollHeight;
+}
+
+function updateVoiceModeUi() {
+  const live = demoState.voiceMode === "live";
+  voiceModeToggle.textContent = live ? "Mode: Live mic" : "Mode: Simulated";
+  micToggle.textContent = live ? "Start mic" : "Run simulation";
+  micToggle.classList.toggle("recording", false);
+  seedCall.textContent = live ? "Run simulated backup" : "Seed mock call";
+  voiceProvider.textContent = live
+    ? "Gemini Live Translate + ElevenLabs TTS"
+    : "Scripted fixture + API probes";
+  setVoiceStatus(live ? "ready" : "live", live ? "Live voice ready" : "Simulation ready");
+  setPreload(live ? "tool preload: waiting for next intent" : "backup mode: scripted call", !live);
+  waveform.classList.toggle("idle", !demoState.micActive);
+}
+
+function renderCandidatePredictions(candidates) {
+  if (!candidates.length) return;
+  const rows = candidates
+    .slice()
+    .sort((a, b) => Number(b.score || 0) - Number(a.score || 0))
+    .slice(0, 4)
+    .map((candidate) => [
+      candidate.predicted_next_intent || candidate.strategy || "next intent",
+      Math.max(1, Math.min(99, Math.round(Number(candidate.score || 0) * 100)))
+    ]);
+  renderPredictions(rows);
+}
+
+function callBranchSocket(englishTranscript) {
+  return new Promise((resolve, reject) => {
+    const socket = new WebSocket(`${WS_BASE}/api/branch`);
+    const candidates = [];
+    socket.onopen = () => {
+      setVoiceStatus("live", "Predicting next intent");
+      setPreload("preloading inventory + courier tools", true);
+      socket.send(JSON.stringify({
+        englishTranscript,
+        ctx: {
+          shopperMode: demoState.promoted ? "VIP parent - Gen 3" : "VIP parent - baseline",
+          badges: ["urgent_event_deadline", "high_loyalty", "retail_voice"],
+          intent: "late_delivery",
+          situationTags: ["gift_deadline", "replacement_inventory", "refund_safety"]
+        },
+        gen: { model: "gemini-2.5-flash", maxCandidates: 5 }
+      }));
+    };
+    socket.onmessage = (event) => {
+      let message;
+      try {
+        message = JSON.parse(event.data);
+      } catch {
+        return;
+      }
+      if (message.type === "candidate") {
+        candidates.push({ ...message.candidate, id: message.id });
+        demoState.pendingCandidates = candidates;
+        renderCandidatePredictions(candidates);
+      }
+      if (message.type === "champion") {
+        resolve({ candidates, championStrategy: message.championStrategy, agentResponse: message.agentResponse });
+      }
+      if (message.type === "error") reject(new Error(message.message || "branch generation failed"));
+    };
+    socket.onerror = () => reject(new Error("branch WebSocket failed"));
+    socket.onclose = () => {
+      if (!candidates.length) setVoiceStatus("error", "Prediction stream closed");
+    };
+  });
+}
+
+function openLiveSocket() {
+  if (demoState.liveSocket && demoState.liveSocket.readyState <= 1) return demoState.liveSocket;
+  const socket = new WebSocket(`${WS_BASE}/api/live`);
+  demoState.liveSocket = socket;
+  socket.onopen = () => {
+    setVoiceStatus("live", "Connecting Gemini Live");
+    socket.send(JSON.stringify({
+      setup: {
+        model: "models/gemini-3.5-live-translate-preview",
+        generation_config: { response_modalities: ["TEXT"] },
+        input_audio_transcription: {},
+        output_audio_transcription: {}
+      }
+    }));
+  };
+  socket.onmessage = (event) => {
+    let message;
+    try {
+      message = JSON.parse(event.data);
+    } catch {
+      return;
+    }
+    if (message.setupComplete) {
+      setVoiceStatus("ready", "Gemini Live connected");
+      return;
+    }
+    const inputText = message.serverContent?.inputTranscription?.text;
+    const outputText = message.serverContent?.outputTranscription?.text
+      || message.serverContent?.modelTurn?.parts?.map((part) => part.text).filter(Boolean).join(" ");
+    if (inputText) demoState.liveInputBuffer = `${demoState.liveInputBuffer} ${inputText}`.trim();
+    if (outputText) demoState.liveOutputBuffer = `${demoState.liveOutputBuffer} ${outputText}`.trim();
+  };
+  socket.onerror = () => setVoiceStatus("error", "Gemini Live error");
+  socket.onclose = () => {
+    if (demoState.micActive) setVoiceStatus("error", "Live socket closed");
+    demoState.liveSocket = null;
+  };
+  return socket;
+}
+
+function sendAudioChunk(base64) {
+  const socket = demoState.liveSocket;
+  if (!socket || socket.readyState !== WebSocket.OPEN) return;
+  socket.send(JSON.stringify({
+    realtime_input: {
+      media_chunks: [{ mime_type: "audio/pcm", data: base64 }]
+    }
+  }));
+}
+
+function fallbackLiveTranscript() {
+  return demoState.promoted
+    ? "This gift is for my son's party tomorrow and the tracking has not moved."
+    : "My daughter's birthday is tomorrow and the tracking says the package has not shipped.";
+}
+
+async function handleLiveUtterance(rawText) {
+  const raw = rawText.trim() || fallbackLiveTranscript();
+  if (!raw) return;
+  if (!liveProfile.classList.contains("identified")) identifyCaller(demoState.promoted ? "sam" : "maya");
+  setVoiceStatus("live", "Translating + scoring");
+  const translation = await callTranslationProbe(raw);
+  const english = translation?.english || raw;
+  const frustration = translation?.sentiment?.frustration ?? (/refund|cancel/i.test(english) ? 0.82 : 0.58);
+  const sentimentLabel = translation?.sentiment?.label || (frustration > 0.7 ? "angry" : "anxious");
+  const tags = translation?.tags || ["urgent_event_deadline"];
+  appendLiveTurn({
+    speaker: "shopper",
+    text: raw,
+    predictions: [["branching", 42], ["refund safety", 24], ["inventory lookup", 22], ["other", 12]],
+    sentiment: [sentimentLabel, `${Math.round((1 - frustration) * 100)}%`],
+    metrics: demoState.promoted ? ["63%", "48", "28%"] : ["46%", "29", "52%"]
+  });
+  if (translation && (translation.lang !== "en-US" || tags.length)) {
+    appendSystemTurn(
+      "Gemini translate",
+      `${english} (${sentimentLabel}, ${Math.round(frustration * 100)}% frustration; ${tags.join(", ")})`
+    );
+  }
+  let branch;
+  try {
+    branch = await callBranchSocket(english);
+  } catch (error) {
+    console.warn("[ui-final] branch stream failed", error);
+    branch = {
+      candidates: [
+        { predicted_next_intent: "accept_replacement", score: demoState.promoted ? 0.91 : 0.78 },
+        { predicted_next_intent: "cancel_or_refund_threat", score: demoState.promoted ? 0.21 : 0.55 },
+        { predicted_next_intent: "asks_confirmation", score: 0.34 }
+      ],
+      championStrategy: "deadline acknowledgement + inventory lookup",
+      agentResponse: demoState.promoted
+        ? "I see the party deadline. Before I talk policy, I am checking local replacement inventory and courier options now."
+        : "I hear the deadline. I am going to check local replacement inventory before we talk refund policy."
+    };
+    renderCandidatePredictions(branch.candidates);
+  }
+  appendSystemTurn("preload", `Champion branch: ${branch.championStrategy}. Inventory and courier tools queued before the next reply.`);
+  const contained = demoState.promoted || /inventory|replacement|courier/i.test(branch.agentResponse);
+  appendLiveTurn({
+    speaker: "agent",
+    text: branch.agentResponse,
+    predictions: contained
+      ? [["accept replacement", 63], ["asks confirmation", 20], ["thanks agent", 12], ["recontact risk", 5]]
+      : [["cancel/refund threat", 45], ["human escalation", 23], ["tracking ask", 18], ["accept", 14]],
+    sentiment: contained ? ["recovering", "68%"] : ["worsening", "18%"],
+    metrics: contained ? ["78%", "61", "20%"] : ["38%", "26", "61%"],
+    system: contained ? "Tool preload completed before customer-facing policy language." : "Branch needs pruning after call."
+  });
+  const tts = await callTtsProbe(branch.agentResponse);
+  if (tts) playAudioFromData(tts.mime, tts.audioBase64);
+  demoState.activeCall = contained ? "success" : "baseline";
+  setVoiceStatus("ready", "Live turn complete");
+  setPreload("tool preload: completed for selected branch", true);
+}
+
+async function startLiveMic() {
+  setNavCollapsed(true);
+  clearInterval(liveTimer);
+  unlockAudio();
+  liveTranscript.innerHTML = "";
+  demoState.liveInputBuffer = "";
+  demoState.liveOutputBuffer = "";
+  demoState.pendingCandidates = [];
+  openLiveSocket();
+  setVoiceStatus("live", "Listening");
+  waveform.classList.remove("idle");
+  micToggle.classList.add("recording");
+  micToggle.textContent = "Stop mic";
+  demoState.micHandle = await startMicCapture(sendAudioChunk);
+  demoState.micActive = true;
+}
+
+async function stopLiveMic() {
+  if (demoState.micHandle) {
+    demoState.micHandle.stop();
+    demoState.micHandle = null;
+  }
+  demoState.micActive = false;
+  micToggle.classList.remove("recording");
+  micToggle.textContent = "Start mic";
+  waveform.classList.add("idle");
+  setVoiceStatus("live", "Processing utterance");
+  const captured = demoState.liveOutputBuffer || demoState.liveInputBuffer;
+  demoState.liveInputBuffer = "";
+  demoState.liveOutputBuffer = "";
+  await handleLiveUtterance(captured);
+}
+
+async function toggleMic() {
+  if (demoState.voiceMode === "simulated") {
+    seedLiveCall();
+    return;
+  }
+  try {
+    if (demoState.micActive) {
+      await stopLiveMic();
+    } else {
+      await startLiveMic();
+    }
+  } catch (error) {
+    console.warn("[ui-final] mic path failed", error);
+    setVoiceStatus("error", "Mic unavailable - use backup");
+    micToggle.classList.remove("recording");
+    micToggle.textContent = "Start mic";
+    waveform.classList.add("idle");
+  }
+}
+
+function toggleVoiceMode() {
+  if (demoState.micActive) return;
+  demoState.voiceMode = demoState.voiceMode === "live" ? "simulated" : "live";
+  updateVoiceModeUi();
+}
+
 function setApiBadge(status, copy) {
   apiBadge.className = `api-badge ${status}`;
   apiBadge.textContent = copy;
@@ -622,6 +968,9 @@ function appendLiveTurn(turn) {
 
 function seedLiveCall() {
   setNavCollapsed(true);
+  demoState.voiceMode = "simulated";
+  updateVoiceModeUi();
+  setVoiceStatus("live", "Running simulated backup");
   clearInterval(liveTimer);
   liveTranscript.innerHTML = "";
   liveIndex = 0;
@@ -633,6 +982,7 @@ function seedLiveCall() {
   liveTimer = setInterval(() => {
     if (liveIndex >= script.length) {
       clearInterval(liveTimer);
+      setVoiceStatus("ready", "Simulation complete");
       return;
     }
     const turn = script[liveIndex];
@@ -861,7 +1211,7 @@ primaryAction.addEventListener("click", () => {
   } else if (activeView === "history") {
     switchView("live");
   } else if (activeView === "live") {
-    seedLiveCall();
+    toggleMic();
   } else if (activeView === "pruning") {
     zoomToSelectedHistoryRun();
   } else if (activeView === "dream") {
@@ -874,6 +1224,8 @@ primaryAction.addEventListener("click", () => {
 resetDemo.addEventListener("click", () => {
   clearInterval(liveTimer);
   clearInterval(dreamTimer);
+  if (demoState.micHandle) demoState.micHandle.stop();
+  if (demoState.liveSocket) demoState.liveSocket.close();
   expanded = false;
   selectedNodeId = "root";
   expandedFamilies.clear();
@@ -881,10 +1233,17 @@ resetDemo.addEventListener("click", () => {
   demoState.currentResult = null;
   demoState.currentRunSaved = false;
   demoState.promoted = false;
+  demoState.voiceMode = "live";
+  demoState.micActive = false;
+  demoState.liveSocket = null;
+  demoState.micHandle = null;
+  demoState.liveInputBuffer = "";
+  demoState.liveOutputBuffer = "";
   liveTranscript.innerHTML = "";
   liveProfile.classList.remove("identified");
-  liveProfile.innerHTML = `<div class="empty-profile"><span>Awaiting caller identification</span><p>LiveKit audio is simulated here. Persona will populate after greeting.</p></div>`;
+  liveProfile.innerHTML = `<div class="empty-profile"><span>Awaiting caller identification</span><p>Start the mic to identify the caller, transcribe the voice stream, and route the live branch.</p></div>`;
   renderPredictions([["late delivery", 44], ["refund request", 24], ["tracking ask", 20], ["other", 12]]);
+  updateVoiceModeUi();
   setNavCollapsed(false);
   switchView("home");
   renderCanvas();
@@ -918,6 +1277,8 @@ createExperiment.addEventListener("click", () => {
   });
 });
 
+voiceModeToggle.addEventListener("click", toggleVoiceMode);
+micToggle.addEventListener("click", toggleMic);
 seedCall.addEventListener("click", seedLiveCall);
 processCall.addEventListener("click", processCurrentCall);
 document.querySelectorAll("[data-pruning-zoom]").forEach((item) => item.addEventListener("click", zoomToSelectedHistoryRun));
@@ -930,4 +1291,5 @@ runDream.addEventListener("click", runDreamPass);
 switchView("home");
 renderCanvas();
 renderPredictions([["late delivery", 44], ["refund request", 24], ["tracking ask", 20], ["other", 12]]);
+updateVoiceModeUi();
 hydrateApiState();

@@ -1,5 +1,6 @@
 export type Iteration = {
   id: string;
+  label?: string;
   voiceInput: "livekit" | "geminiLive";
   tts: "google" | "elevenlabs";
   branchModel: string;

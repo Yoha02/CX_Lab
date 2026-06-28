@@ -274,7 +274,7 @@
         <aside class="live-profile" id="liveProfile">
           <div class="empty-profile">
             <span>Awaiting caller identification</span>
-            <p>LiveKit audio is simulated here. Persona will populate after greeting.</p>
+            <p>Start the mic to identify the caller, transcribe the voice stream, and route the live branch.</p>
           </div>
         </aside>
         <section class="live-console">
@@ -284,9 +284,16 @@
               <h2 id="liveTitle">Voice containment workspace</h2>
             </div>
             <div class="top-actions">
-              <button class="ghost-btn" id="seedCall" type="button">Seed mock call</button>
+              <button class="ghost-btn voice-mode-toggle" id="voiceModeToggle" type="button">Mode: Live mic</button>
+              <button class="primary-btn mic-btn" id="micToggle" type="button">Start mic</button>
+              <button class="ghost-btn" id="seedCall" type="button">Run simulated backup</button>
               <button class="primary-btn" id="processCall" type="button">Process call</button>
             </div>
+          </div>
+          <div class="voice-status-strip">
+            <span class="voice-status-pill ready" id="voiceStatus">Live voice ready</span>
+            <span class="voice-status-pill" id="voiceProvider">Gemini Live Translate + ElevenLabs TTS</span>
+            <span class="preload-chip" id="preloadChip">tool preload: waiting for next intent</span>
           </div>
           <div class="voice-stage">
             <div class="waveform" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>

@@ -1,6 +1,9 @@
 import { Room, RoomEvent, type TranscriptionSegment } from "livekit-client";
 
-export interface LiveKitHandle { leave(): void; }
+export interface LiveKitHandle {
+  setMicrophoneEnabled(enabled: boolean): Promise<void>;
+  leave(): void;
+}
 
 export async function joinLiveKitRoom(onTranscript: (text: string, final: boolean) => void): Promise<LiveKitHandle> {
   const res = await fetch(`/api/livekit/token?room=cx-demo&identity=studio-${Date.now()}`);
@@ -10,6 +13,10 @@ export async function joinLiveKitRoom(onTranscript: (text: string, final: boolea
     for (const s of segments) onTranscript(s.text, s.final);
   });
   await room.connect(url, token);
-  await room.localParticipant.setMicrophoneEnabled(true);
-  return { leave() { room.disconnect(); } };
+  return {
+    setMicrophoneEnabled(enabled: boolean) {
+      return room.localParticipant.setMicrophoneEnabled(enabled);
+    },
+    leave() { room.disconnect(); }
+  };
 }

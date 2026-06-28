@@ -302,6 +302,15 @@ h3 {
   background: var(--panel);
 }
 
+.mic-btn.recording {
+  background: var(--red);
+  box-shadow: 0 10px 28px rgba(183, 93, 85, 0.24);
+}
+
+.voice-mode-toggle {
+  min-width: 132px;
+}
+
 .content-view {
   display: none;
 }
@@ -1126,6 +1135,51 @@ dd {
   padding: 16px;
 }
 
+.voice-status-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 14px;
+}
+
+.voice-status-pill,
+.preload-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.voice-status-pill.ready {
+  background: var(--green-soft);
+  color: var(--green);
+  border-color: rgba(47, 125, 87, 0.22);
+}
+
+.voice-status-pill.live {
+  background: var(--blue-soft);
+  color: var(--blue);
+  border-color: rgba(63, 124, 172, 0.28);
+}
+
+.voice-status-pill.error {
+  background: var(--red-soft);
+  color: var(--red);
+  border-color: rgba(183, 93, 85, 0.28);
+}
+
+.preload-chip.active {
+  background: var(--amber-soft);
+  color: var(--amber);
+  border-color: rgba(181, 136, 55, 0.3);
+}
+
 .waveform {
   display: flex;
   align-items: center;
@@ -1135,6 +1189,11 @@ dd {
   margin-bottom: 14px;
   border-radius: 8px;
   background: linear-gradient(90deg, var(--blue-soft), var(--green-soft));
+}
+
+.waveform.idle i {
+  animation-play-state: paused;
+  opacity: 0.42;
 }
 
 .waveform i {

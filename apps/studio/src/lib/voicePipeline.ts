@@ -184,10 +184,9 @@ function buildLiveKitHandle(): PipelineHandle {
     async unmute() {
       if (mic) return;
       unlockAudio();
-      // LiveKit captures via the room; just unlock audio for playback
+      await roomHandle?.setMicrophoneEnabled(true);
       useRunStore.getState().setCallStatus("speaking");
-      // Start a local mic capture feeding into finalizeUtterance as a sidecar
-      mic = await startMicCapture(() => { /* LiveKit handles the audio room */ });
+      mic = { stop: () => void roomHandle?.setMicrophoneEnabled(false) };
     },
     mute() {
       mic?.stop();

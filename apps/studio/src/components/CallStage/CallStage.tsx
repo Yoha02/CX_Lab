@@ -5,20 +5,21 @@ import { TranscriptTurn } from "./TranscriptTurn.js";
 import { Waveform } from "./Waveform.js";
 
 export function CallStage() {
-  const { turns, callStatus } = useRunStore();
+  const { turns, callStatus, iterations, activeIterationIndex } = useRunStore();
   const pipeline = useRef<PipelineHandle | null>(null);
   const [elapsed, setElapsed] = useState(0);
 
-  // Auto-connect on page load
+  // Connect only after iteration config has loaded. The selected iteration
+  // decides whether the mic path uses LiveKit or Gemini Live Translate.
   useEffect(() => {
+    if (!iterations.length) return;
     const handle = connectPipeline();
     pipeline.current = handle;
     return () => {
       handle.disconnect();
       pipeline.current = null;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [iterations.length, activeIterationIndex]);
 
   // Elapsed timer while speaking
   useEffect(() => {

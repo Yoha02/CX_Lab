@@ -9,10 +9,45 @@ This document maps Person 3's backend, memory, vector DB, and dream-pass work to
 `main` now contains both major workstreams:
 
 - `prototype-four/`: static platform UI scaffold for persona planning, interaction history, live call simulation, pruning, dream pass, and analytics.
+- `ui-final/`: primary judge-facing platform UI. This is now wired to the live API stack while preserving the simulated script as a stage-safe fallback.
 - `apps/api/`, `packages/memory/`, `packages/dream/`, `packages/integrations/*`, `infra/digitalocean/`: Person 3's backend, persistence, pgvector, Gemini, and dream-cluster implementation.
 - `apps/studio/`: Person 1's React/Vite voice studio with LiveKit, Gemini Live, Gemini translation, and TTS provider work. This was imported selectively from `origin/tts+sst+livetranslate` because that branch was based on an older repo shape.
 
 The integration branch should keep the static UI behavior as a fallback while progressively replacing hardcoded data with API-backed state.
+
+## Final UI Live Wiring Update
+
+`ui-final/` is the primary demo surface for judges. The React app in `apps/studio/` remains useful for staging Person 1 voice work, but the live presentation should run from:
+
+```text
+http://127.0.0.1:8787/ui-final/index.html
+```
+
+The `Live call` page now supports two modes:
+
+```text
+Live mic mode:
+  browser mic
+  -> WS /api/live
+  -> Gemini Live transcription / translation
+  -> POST /api/translate for sentiment and language signals
+  -> WS /api/branch for next-intent candidates and champion response
+  -> POST /api/tts for ElevenLabs speech playback
+  -> UI updates predictions, sentiment, containment, NPS proxy, and recontact risk
+
+Simulated backup mode:
+  seeded Maya/Sam script
+  -> same UI surfaces
+  -> POST /api/translate and POST /api/tts probes where relevant
+  -> fallback if browser mic permissions or conference audio conditions are unreliable
+```
+
+Important behavior:
+
+- The primary action on `Live call` starts the mic path, not the old seeded transcript.
+- `Run simulated backup` intentionally remains available so the team can recover on stage without leaving the final UI.
+- The live path explicitly showcases the differentiated loop: predict the next intent, preload inventory/courier tools, respond with the champion branch, then process the call into pruning/dream state.
+- Real browser mic permission must still be granted by the presenting human; Codex can validate the WebSocket/API path with generated audio but cannot grant mic permission on behalf of the user.
 
 ## Person 1 Branch Import Summary
 
