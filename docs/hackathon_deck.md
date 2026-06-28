@@ -1,4 +1,4 @@
-# CX Dojo Hackathon Slide Deck (4 High-Level Slides)
+# RACX Hackathon Slide Deck (4 High-Level Slides)
 
 This deck outlines the presentation starting from **Slide 4** (the first content slide in the master template), removing Google Cloud branding while keeping the original layout guides, fonts (*Google Sans Medium*), and color palettes (G Blue, G Green, G Red, G Grey).
 
@@ -13,8 +13,8 @@ This deck outlines the presentation starting from **Slide 4** (the first content
 * **Subtitle Size:** 48pt Google Sans Medium
 
 ### Content
-# CX Dojo
-## The Recursive Self-Improvement Loop for Conversational Commerce
+# RACX
+## Customer Experience Platform via Continuous Resolution Loops, Engineered for Containment
 
 ---
 
@@ -24,12 +24,12 @@ This deck outlines the presentation starting from **Slide 4** (the first content
 * **Body Text Size:** 32pt Google Sans Medium
 
 ### Content
-> "Static customer service playbooks force a broken trade-off: **escalate to humans** too early, or **alienate shoppers** with rigid policies."
+> "Static playbooks force AI agents to hit **The Static Containment Ceiling**: they repeat the same failures because they cannot learn."
 
 ### Context Points (24pt / 20pt)
-* Customer support agents use playbooks that cannot adapt to real-time containment failures.
-* Over-correcting for one customer persona breaks containment flow for another.
-* When failures occur, the valuable transcripts go into unread databases rather than fixing the core guidelines.
+* Support transcripts are buried in databases, leaving agent rules frozen.
+* Traditional support tools focus on *"answering a question"* rather than *"solving the underlying ticket."*
+* Rigorous guidelines force a broken trade-off: premature human escalation or customer frustration.
 
 ---
 
@@ -39,12 +39,12 @@ This deck outlines the presentation starting from **Slide 4** (the first content
 * **Body Text Size:** 24pt Google Sans Medium
 
 ### Left Column: Traditional Persona Tuning (G Grey)
-* **The Trap:** Optimizing rules purely by customer persona IDs (e.g. Loyal Shopper vs. First-time Buyer).
-* **The Result:** High overhead, slow revisions, and failure to generalize lessons across customer journeys.
+* **The Silo:** Trying to fix support flows based purely on customer persona IDs (e.g. Loyal Shopper vs. First-time Buyer).
+* **The Limitation:** Overfits instructions to individual profiles; fails to identify core behavioral patterns across different shoppers.
 
 ### Right Column: Behavioral Failure Clusters (G Blue Highlight)
-* **The Missing Link:** Grouping failures by behavioral keys (`intent + situation_tags + agent_strategy + failure_mode`).
-* **The Advantage:** Identifying the core behavioral pattern (e.g., explaining late delivery policy on urgent event deadlines) across all personas simultaneously.
+* **The Breakthrough:** Grouping failures by composite behavioral keys (`intent + situation_tags + agent_strategy + failure_mode`).
+* **The Reality:** *Personas personalize the fix, but failure clusters discover the fix.* Solving the common root breakdown across all personas simultaneously.
 
 ---
 
@@ -53,11 +53,11 @@ This deck outlines the presentation starting from **Slide 4** (the first content
 * **Heading Size:** 48pt Google Sans Medium
 * **Body Text Size:** 24pt Google Sans Medium
 
-### The 3-Step Recursive Self-Improvement (RSI) Loop
+### The 3-Loop Continuous Resolution Loop Engine
 
 * **1. Vectorized Capture (G Blue):** 
-  Every failed agent session is automatically vectorized using `pgvector` and saved, allowing instant similarity lookup for human operators during escalations.
-* **2. Clustered Dream Pass (G Yellow):** 
-  Offline background agents analyze unprocessed failures, grouping them into behavioral clusters instead of persona silos to identify structural playbook bugs.
-* **3. Consolidated Patch Propagation (G Green):** 
-  The system automatically generates a global playbook rule paired with customized persona overrides, promoting and deploying updated playbooks to production.
+  Failed calls are automatically embedded and saved using `pgvector`, creating a real-time semantic memory search for live containment retrieval.
+* **2. Clustered Dreaming (G Yellow):** 
+  Offline background agents analyze unprocessed failure runs, grouping them into behavioral clusters to identify structural playbook bugs.
+* **3. Playbook Patch Propagation (G Green):** 
+  The system automatically generates a global playbook rule paired with customized persona overrides, promoting and deploying updated playbooks back to production.

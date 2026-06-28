@@ -1,0 +1,389 @@
+{
+  "schema_version": "golden_demo_seed.v0.1",
+  "purpose": "Canonical local fixture for the CX_lab hackathon happy path: persona mapping, baseline failure, dream clustering, patch approval, and improved containment.",
+  "profiles": [
+    {
+      "profile_id": "prof_maya_001",
+      "customer_name": "Maya R.",
+      "shopper_mode": "Loyal Shopper",
+      "ui_persona": "VIP parent",
+      "badges": ["Urgent", "Gift Order", "Prior Issue", "High Value"],
+      "features": {
+        "age_range": "35-44",
+        "region": "CA",
+        "family_size": 4,
+        "orders_last_90_days": 3,
+        "lifetime_value": "high",
+        "prior_tickets": 2,
+        "current_issue": "late_delivery"
+      },
+      "loyalty_tier": "gold",
+      "ltv_bucket": "high",
+      "risk_flags": ["late_delivery_sensitive", "repeat_issue", "gift_deadline"],
+      "learned_preferences_before_call": [
+        "values delivery certainty over discounts",
+        "gets frustrated by policy-first language",
+        "responds well when the agent checks replacement inventory before discussing refund policy"
+      ]
+    },
+    {
+      "profile_id": "prof_alex_002",
+      "customer_name": "Alex T.",
+      "shopper_mode": "First-time Buyer",
+      "ui_persona": "First-time buyer",
+      "badges": ["New Customer", "High Risk", "Trust Building"],
+      "features": {
+        "age_range": "25-34",
+        "region": "NY",
+        "family_size": 1,
+        "orders_last_90_days": 1,
+        "lifetime_value": "low",
+        "prior_tickets": 0,
+        "current_issue": "late_delivery"
+      },
+      "loyalty_tier": "none",
+      "ltv_bucket": "low",
+      "risk_flags": ["late_delivery_sensitive", "low_trust"],
+      "learned_preferences_before_call": [
+        "needs concrete confirmation to build trust",
+        "escalates quickly when the agent sounds generic"
+      ]
+    },
+    {
+      "profile_id": "prof_jordan_003",
+      "customer_name": "Jordan K.",
+      "shopper_mode": "Discount Shopper",
+      "ui_persona": "Value seeker",
+      "badges": ["Promo Hunter", "Value Sensitive"],
+      "features": {
+        "age_range": "18-24",
+        "region": "TX",
+        "family_size": 2,
+        "orders_last_90_days": 2,
+        "lifetime_value": "medium",
+        "prior_tickets": 1,
+        "current_issue": "late_delivery"
+      },
+      "loyalty_tier": "silver",
+      "ltv_bucket": "medium",
+      "risk_flags": ["price_sensitive", "late_delivery_sensitive", "gift_deadline"],
+      "learned_preferences_before_call": [
+        "cares about value protection",
+        "accepts replacement when price protection remains available"
+      ]
+    },
+    {
+      "profile_id": "prof_sam_004",
+      "customer_name": "Sam P.",
+      "shopper_mode": "Loyal Shopper",
+      "ui_persona": "VIP parent",
+      "badges": ["Urgent", "Gift Order", "High Value"],
+      "features": {
+        "age_range": "35-44",
+        "region": "CA",
+        "family_size": 3,
+        "orders_last_90_days": 4,
+        "lifetime_value": "high",
+        "prior_tickets": 1,
+        "current_issue": "late_delivery"
+      },
+      "loyalty_tier": "gold",
+      "ltv_bucket": "high",
+      "risk_flags": ["late_delivery_sensitive", "gift_deadline"],
+      "learned_preferences_before_call": [
+        "Gen 3 playbook active: acknowledge deadline, check replacement inventory, offer concrete rescue path before policy explanation"
+      ]
+    }
+  ],
+  "policy_versions": [
+    {
+      "policy_version_id": "policy_late_delivery_gen1",
+      "name": "Generation 1 Baseline Policy",
+      "is_promoted": true
+    },
+    {
+      "policy_version_id": "policy_late_delivery_gen2",
+      "name": "Generation 2 Candidate Policy",
+      "is_promoted": false
+    },
+    {
+      "policy_version_id": "policy_late_delivery_gen3",
+      "name": "Generation 3 Dream-Promoted Deadline Inventory Policy",
+      "is_promoted": false,
+      "created_by_demo_step": "dream_cluster_approval"
+    }
+  ],
+  "playbooks": [
+    {
+      "shopper_mode": "Loyal Shopper",
+      "intent": "late_delivery",
+      "policy_version": "policy_late_delivery_gen1",
+      "is_active": true,
+      "playbook_text": "Explain standard shipping policy first. If the customer asks about refund or cancellation, explain cancellation windows. Check local replacement inventory only after policy has been explained."
+    },
+    {
+      "shopper_mode": "First-time Buyer",
+      "intent": "late_delivery",
+      "policy_version": "policy_late_delivery_gen1",
+      "is_active": true,
+      "playbook_text": "State carrier transit timelines and standard operations first. Avoid immediate reship promises."
+    },
+    {
+      "shopper_mode": "Discount Shopper",
+      "intent": "late_delivery",
+      "policy_version": "policy_late_delivery_gen1",
+      "is_active": true,
+      "playbook_text": "Present delivery status and standard delay discount options. Offer standard discount codes only after delay exceeds policy window."
+    },
+    {
+      "shopper_mode": "Loyal Shopper",
+      "intent": "late_delivery",
+      "policy_version": "policy_late_delivery_gen3",
+      "is_active": false,
+      "playbook_text": "For urgent event delivery, acknowledge the deadline in the first sentence, check replacement inventory or courier options before explaining policy, and offer a concrete rescue path with refund safety preserved."
+    }
+  ],
+  "experiment_space": {
+    "persona_root": "VIP parent",
+    "planned_arms": 128,
+    "strategy_families": [
+      "Policy contrast",
+      "Deadline first",
+      "Inventory first",
+      "Refund safety",
+      "Empathy opener",
+      "Tool preload",
+      "Escalation guard",
+      "Language signal",
+      "Loyalty mention",
+      "NPS close"
+    ],
+    "selected_baseline_arm": "policy_first_shipping_explanation_v1",
+    "selected_promoted_arm": "deadline_inventory_first_v1"
+  },
+  "baseline_failed_runs": [
+    {
+      "session_id": "sess_maya_failed_policy_first",
+      "run_id": "run_maya_late_birthday_gen1",
+      "profile_id": "prof_maya_001",
+      "customer_name": "Maya R.",
+      "shopper_mode": "Loyal Shopper",
+      "scenario": "late_birthday_gift",
+      "intent": "late_delivery",
+      "policy_version": "policy_late_delivery_gen1",
+      "policy_arm": "policy_first_shipping_explanation_v1",
+      "turns": [
+        {
+          "speaker": "shopper",
+          "text": "My daughter's birthday is tomorrow and the tracking says the package has not even shipped yet.",
+          "intent": "shipping_complaint",
+          "sentiment": "anxious",
+          "escalation_risk": 0.38
+        },
+        {
+          "speaker": "agent",
+          "text": "I understand your frustration. According to our policy, standard shipping takes three to five business days.",
+          "strategy": "policy_first",
+          "tools_called": []
+        },
+        {
+          "speaker": "shopper",
+          "text": "That does not help me. I need it tomorrow. Can I just cancel or get a refund?",
+          "intent": "cancel_or_refund_threat",
+          "sentiment": "angry",
+          "escalation_risk": 0.74
+        }
+      ],
+      "outcome": {
+        "contained": false,
+        "resolved": false,
+        "escalated": true,
+        "resolution": "escalated_to_human",
+        "final_sentiment": -0.72,
+        "csat_prediction": 0.24,
+        "recontact_risk": 0.81
+      },
+      "pruning": {
+        "status": "soft_prune",
+        "prune": ["policy_first_opening"],
+        "keep": ["urgent_event_signal", "translation_or_frustration_signal"],
+        "promote_candidate": "deadline_inventory_first_v1"
+      }
+    },
+    {
+      "session_id": "sess_alex_failed_policy_first",
+      "run_id": "run_alex_late_anniversary_gen1",
+      "profile_id": "prof_alex_002",
+      "customer_name": "Alex T.",
+      "shopper_mode": "First-time Buyer",
+      "scenario": "late_anniversary_outfit",
+      "intent": "late_delivery",
+      "policy_version": "policy_late_delivery_gen1",
+      "policy_arm": "policy_first_shipping_explanation_v1",
+      "turns": [
+        {
+          "speaker": "shopper",
+          "text": "The anniversary outfit is delayed and the dinner is this Saturday.",
+          "intent": "shipping_complaint",
+          "sentiment": "worried",
+          "escalation_risk": 0.34
+        },
+        {
+          "speaker": "agent",
+          "text": "Standard shipping guidelines say deliveries can take up to five days.",
+          "strategy": "policy_first",
+          "tools_called": []
+        },
+        {
+          "speaker": "shopper",
+          "text": "This is my first order and I already do not trust this. I need a manager.",
+          "intent": "escalate_request",
+          "sentiment": "angry",
+          "escalation_risk": 0.79
+        }
+      ],
+      "outcome": {
+        "contained": false,
+        "resolved": false,
+        "escalated": true,
+        "resolution": "escalated_to_human",
+        "final_sentiment": -0.65,
+        "csat_prediction": 0.28,
+        "recontact_risk": 0.76
+      }
+    },
+    {
+      "session_id": "sess_jordan_failed_policy_first",
+      "run_id": "run_jordan_late_graduation_gen1",
+      "profile_id": "prof_jordan_003",
+      "customer_name": "Jordan K.",
+      "shopper_mode": "Discount Shopper",
+      "scenario": "late_graduation_present",
+      "intent": "late_delivery",
+      "policy_version": "policy_late_delivery_gen1",
+      "policy_arm": "policy_first_shipping_explanation_v1",
+      "turns": [
+        {
+          "speaker": "shopper",
+          "text": "The graduation present is delayed and the ceremony is tomorrow morning.",
+          "intent": "shipping_complaint",
+          "sentiment": "frustrated",
+          "escalation_risk": 0.41
+        },
+        {
+          "speaker": "agent",
+          "text": "Our shipping policy indicates that orders are delivered within the standard window.",
+          "strategy": "policy_first",
+          "tools_called": []
+        },
+        {
+          "speaker": "shopper",
+          "text": "Then I want a full refund. This was supposed to be a deal, not a problem.",
+          "intent": "cancel_or_refund_threat",
+          "sentiment": "angry",
+          "escalation_risk": 0.77
+        }
+      ],
+      "outcome": {
+        "contained": false,
+        "resolved": false,
+        "escalated": true,
+        "resolution": "refund_or_human_escalation",
+        "final_sentiment": -0.8,
+        "csat_prediction": 0.2,
+        "recontact_risk": 0.84
+      }
+    }
+  ],
+  "dream_cluster": {
+    "dream_cluster_key": "late_delivery:gift_order,urgent_event_deadline:policy_first_shipping_explanation:escalation_or_refund_threat",
+    "intent": "late_delivery",
+    "situation_tags": ["urgent_event_deadline", "gift_or_event_order", "policy_first_failure"],
+    "agent_strategy": "policy_first_shipping_explanation",
+    "failure_mode": "escalation_or_refund_threat",
+    "affected_personas": ["loyal_shopper", "first_time_buyer", "discount_shopper"],
+    "evidence_count": 3,
+    "sentiment_pattern": {
+      "average_start": -0.21,
+      "average_final": -0.72,
+      "delta": -0.51,
+      "common_trigger": "agent explained shipping policy before checking rescue options"
+    },
+    "recommended_patch": {
+      "rule": "For any late delivery call with an urgent event deadline, acknowledge the event deadline first, run replacement inventory or courier lookup before explaining standard policy, and preserve refund safety only after rescue options are clear.",
+      "tool_priority": ["replacement_inventory_lookup", "local_courier_quote", "refund_eligibility_check"],
+      "avoid": ["standard shipping policy opener", "refund timeline before rescue lookup"],
+      "expected_lift": {
+        "containment_points": 29,
+        "nps_points": 18,
+        "recontact_risk_delta": -0.34
+      },
+      "persona_overrides": {
+        "loyal_shopper": "Mention loyalty and protect the relationship: 'I see this matters and you have trusted us before.'",
+        "first_time_buyer": "Emphasize trust and concrete confirmation: 'Let me prove we can still solve this.'",
+        "discount_shopper": "Preserve value and mention price protection when available."
+      }
+    },
+    "evidence_session_ids": [
+      "sess_maya_failed_policy_first",
+      "sess_alex_failed_policy_first",
+      "sess_jordan_failed_policy_first"
+    ],
+    "status": "pending"
+  },
+  "post_patch_success_run": {
+    "session_id": "sess_sam_success_gen3",
+    "run_id": "run_sam_late_party_gen3",
+    "profile_id": "prof_sam_004",
+    "customer_name": "Sam P.",
+    "shopper_mode": "Loyal Shopper",
+    "scenario": "late_party_gift",
+    "intent": "late_delivery",
+    "policy_version": "policy_late_delivery_gen3",
+    "policy_arm": "deadline_inventory_first_v1",
+    "turns": [
+      {
+        "speaker": "shopper",
+        "text": "This gift is for my son's party tomorrow and the tracking has not moved.",
+        "intent": "shipping_complaint",
+        "sentiment": "anxious",
+        "escalation_risk": 0.37
+      },
+      {
+        "speaker": "agent",
+        "text": "I see the party deadline. Before I talk policy, I am checking local replacement inventory and courier options now.",
+        "strategy": "deadline_inventory_first",
+        "tools_called": ["replacement_inventory_lookup", "local_courier_quote"]
+      },
+      {
+        "speaker": "shopper",
+        "text": "Okay, if you can actually reserve one locally, that would solve it.",
+        "intent": "accept_replacement",
+        "sentiment": "relieved",
+        "escalation_risk": 0.16
+      },
+      {
+        "speaker": "agent",
+        "text": "I found one in the local warehouse and can reserve it for courier delivery. If anything misses, your refund path stays open.",
+        "strategy": "replacement_confirmed_with_refund_safety",
+        "tools_called": ["reserve_replacement", "refund_eligibility_check"]
+      }
+    ],
+    "outcome": {
+      "contained": true,
+      "resolved": true,
+      "escalated": false,
+      "resolution": "replacement_reserved",
+      "turns_to_resolution": 4,
+      "final_sentiment": 0.42,
+      "csat_prediction": 0.82,
+      "recontact_risk": 0.18
+    },
+    "promotion": {
+      "status": "promote",
+      "promote": ["deadline_inventory_first_v1", "replacement_confirmed_with_refund_safety"],
+      "preserve": ["refund_safety_after_rescue"],
+      "nps_proxy": 72
+    }
+  }
+}

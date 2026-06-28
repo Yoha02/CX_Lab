@@ -15,6 +15,28 @@ interface RunFeatures {
   };
 }
 
+function normalizeFeatures(features: RunFeatures, run: any, transcriptText: string): RunFeatures {
+  const tags = new Set((features.situation_tags || []).map((tag) => String(tag).trim()).filter(Boolean));
+  const scenario = String(run.metadata?.scenario || '').toLowerCase();
+  const transcript = transcriptText.toLowerCase();
+  const hasEventDeadline =
+    tags.has('urgent_event_deadline') ||
+    /birthday|anniversary|graduation|party|tomorrow|deadline/.test(`${scenario} ${transcript}`);
+
+  if ((features.intent || run.metadata?.intent) === 'late_delivery' && hasEventDeadline) {
+    tags.add('urgent_event_deadline');
+    tags.add('gift_order');
+  }
+
+  return {
+    ...features,
+    intent: features.intent || run.metadata?.intent || 'late_delivery',
+    situation_tags: [...tags],
+    agent_strategy: features.agent_strategy || 'policy_first_shipping_explanation',
+    failure_mode: features.failure_mode || 'escalation_or_refund_threat'
+  };
+}
+
 export async function runDreamPass(): Promise<any[]> {
   const failedRuns = await getUnprocessedFailedRuns();
   if (failedRuns.length === 0) {
@@ -90,6 +112,8 @@ export async function runDreamPass(): Promise<any[]> {
         }
       };
     }
+
+    features = normalizeFeatures(features, run, transcriptText);
 
     // Build dream cluster key
     const sortedTags = [...features.situation_tags].sort().join(',');

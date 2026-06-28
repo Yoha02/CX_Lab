@@ -9,6 +9,7 @@
     "infra/*"
   ],
   "scripts": {
+    "build": "npm run build --workspace=@cx-lab/contracts && npm run build --workspace=@cx-lab/digitalocean && npm run build --workspace=@cx-lab/gemini && npm run build --workspace=@cx-lab/eval && npm run build --workspace=@cx-lab/memory && npm run build --workspace=@cx-lab/dream && npm run build --workspace=@cx-lab/infra-db && npm run build --workspace=apps/api && npm run build --workspace=@cx-lab/simulator && npm run build --workspace=apps/studio",
     "api:dev": "npm run dev --workspace=apps/api",
     "api:init-db": "npm run init-db --workspace=infra/digitalocean",
     "api:test": "npm run test --workspace=packages/simulator"

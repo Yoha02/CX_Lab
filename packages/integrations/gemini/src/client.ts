@@ -25,7 +25,8 @@ if (!envLoaded) {
 }
 
 const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
-const modelName = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const embeddingModelName = process.env.GEMINI_EMBEDDING_MODEL || 'gemini-embedding-001';
 
 let GoogleGenerativeAI: any;
 let hasGenAI = false;
@@ -127,7 +128,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
 
   try {
     const ai = new GoogleGenerativeAI(apiKey);
-    const model = ai.getGenerativeModel({ model: 'text-embedding-004' });
+    const model = ai.getGenerativeModel({ model: embeddingModelName });
     const result = await model.embedContent(text);
     if (result && result.embedding && result.embedding.values) {
       // Ensure it is 1536 dimensions. text-embedding-004 usually outputs 768 dimensions by default.
