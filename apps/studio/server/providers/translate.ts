@@ -12,8 +12,8 @@ export interface TranslateResult {
 
 export async function detectAndTranslate(text: string): Promise<TranslateResult> {
   const prompt = `You are a retail support assistant pre-processor. For the customer message below:
-1. Detect the language (BCP-47, e.g. es-ES, en-US).
-2. Keep the original text.
+1. Detect the language (BCP-47, e.g. es-ES, en-US). IMPORTANT: if the text is a phonetic/transliterated rendering of English words in a non-English script (e.g. English words spelled out in Kannada, Hindi, Arabic, or any other script — common when a speech model hallucinates the script from prior context), treat it as English and return lang "en-US" with the intended English sentence as both original and english.
+2. Keep the original text (or the English reconstruction if phonetic English was detected).
 3. Translate to natural English.
 4. Read sentiment: a short label (e.g. "frustrated", "anxious", "neutral", "calm") and a frustration score 0..1.
 Return ONLY compact JSON: {"lang":"<bcp47>","original":"<text>","english":"<english>","sentiment":{"label":"<label>","frustration":<0..1>}}.

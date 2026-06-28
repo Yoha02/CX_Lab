@@ -35,9 +35,12 @@ async function finalizeUtterance(rawText: string, geminiTranslated?: string): Pr
     const d = await r.json();
     const english = geminiTranslated ?? d.english;
 
+    // If translate confirmed the language is English (including phonetic-English detection),
+    // update original so the transcript shows readable English, not a foreign-script rendering.
+    const resolvedOriginal = d.lang?.startsWith("en") ? english : undefined;
     useRunStore.setState(s => ({
       turns: s.turns.map(t => t.turn_id === id
-        ? { ...t, english, lang: d.lang, sentiment: d.sentiment }
+        ? { ...t, english, lang: d.lang, sentiment: d.sentiment, ...(resolvedOriginal ? { original: resolvedOriginal } : {}) }
         : t),
     }));
 

@@ -1,25 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { useRunStore } from "../../state/runStore.js";
 import { connectPipeline, type PipelineHandle } from "../../lib/voicePipeline.js";
 import { TranscriptTurn } from "./TranscriptTurn.js";
 import { Waveform } from "./Waveform.js";
 
-const LANG_NAMES: Record<string, string> = {
-  "es": "Spanish", "es-MX": "Spanish (MX)", "es-ES": "Spanish (ES)",
-  "fr": "French", "fr-FR": "French (FR)",
-  "de": "German", "pt": "Portuguese", "pt-BR": "Portuguese (BR)",
-  "zh": "Chinese", "ja": "Japanese", "ko": "Korean",
-  "ar": "Arabic", "hi": "Hindi", "it": "Italian",
-};
-
-function langName(code: string) {
-  return LANG_NAMES[code] ?? code;
-}
-
 export function CallStage() {
   const { turns, callStatus } = useRunStore();
-  const languageSwitch = useRunStore(s => s.languageSwitch);
   const pipeline = useRef<PipelineHandle | null>(null);
   const [elapsed, setElapsed] = useState(0);
 
@@ -121,80 +107,6 @@ export function CallStage() {
       </div>
 
       <Waveform active={callStatus === "speaking"} />
-
-      {/* Language rescue banner */}
-      <AnimatePresence>
-        {languageSwitch && (
-          <motion.div
-            initial={{ opacity: 0, y: -8, scaleY: 0.9 }}
-            animate={{ opacity: 1, y: 0, scaleY: 1 }}
-            exit={{ opacity: 0, y: -8, scaleY: 0.9 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              border: "1.5px solid rgba(63,124,172,0.4)",
-              borderRadius: 8,
-              background: "linear-gradient(135deg, #ddebf4 0%, #e0f0e5 100%)",
-              padding: "12px 14px",
-            }}
-          >
-            {/* Title row */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
-              <span style={{
-                fontSize: 11, fontWeight: 900, textTransform: "uppercase",
-                color: "#3f7cac", letterSpacing: "0.04em",
-              }}>
-                🌐 Gemini 3.5 Live Translate
-              </span>
-              <span style={{
-                fontSize: 11, fontWeight: 800, padding: "2px 8px",
-                borderRadius: 999, background: "#f4dfdc", color: "#8a2a24",
-              }}>
-                {langName(languageSwitch.lang)} → English
-              </span>
-              {languageSwitch.frustration > 0.5 && (
-                <span style={{
-                  fontSize: 11, fontWeight: 800, padding: "2px 8px",
-                  borderRadius: 999, background: "#f4dfdc", color: "#b75d55",
-                }}>
-                  ⚠ frustration spike {(languageSwitch.frustration * 100) | 0}%
-                </span>
-              )}
-            </div>
-
-            {/* Translation side-by-side */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "#68736e", marginBottom: 3 }}>
-                  {langName(languageSwitch.lang)}
-                </div>
-                <p style={{ fontSize: 13, margin: 0, lineHeight: 1.4, color: "#1f2726", fontStyle: "italic" }}>
-                  "{languageSwitch.original}"
-                </p>
-              </div>
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "#2f7d57", marginBottom: 3 }}>
-                  English (normalised)
-                </div>
-                <p style={{ fontSize: 13, margin: 0, lineHeight: 1.4, color: "#1f2726" }}>
-                  "{languageSwitch.english}"
-                </p>
-              </div>
-            </div>
-
-            {/* Situation tags */}
-            {languageSwitch.tags.length > 0 && (
-              <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
-                {languageSwitch.tags.map(t => (
-                  <span key={t} style={{
-                    fontSize: 11, fontWeight: 800, padding: "2px 8px",
-                    borderRadius: 999, background: "rgba(63,124,172,0.12)", color: "#3f7cac",
-                  }}>{t.replace(/_/g, " ")}</span>
-                ))}
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Transcript */}
       <div className="transcript">

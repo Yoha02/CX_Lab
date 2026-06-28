@@ -4,16 +4,33 @@ export function TranscriptTurn({ turn }: { turn: Turn }) {
   const isShopper = turn.speaker === "shopper";
   const frustPct = (turn.sentiment?.frustration ?? 0) * 100 | 0;
   const frustColor = frustPct > 60 ? "#b75d55" : frustPct > 30 ? "#b8842f" : "#2f7d57";
+  const wasTranslated = isShopper
+    && turn.lang && !turn.lang.startsWith("en")
+    && turn.english && turn.english !== turn.original;
 
   return (
     <article className={`turn ${isShopper ? "turn-shopper" : "turn-agent"}`}>
       <div className="turn-label">
         <span>{isShopper ? "shopper" : "agent"}</span>
-        {isShopper && turn.lang && turn.lang !== "en-US" && turn.lang !== "en" && (
-          <span style={{ fontFamily: "var(--font-mono)", opacity: 0.7, marginLeft: 6 }}>{turn.lang}</span>
+        {isShopper && turn.lang && !turn.lang.startsWith("en") && (
+          <span style={{ fontFamily: "var(--font-mono)", opacity: 0.7, marginLeft: 4 }}>
+            {turn.lang.toUpperCase()}
+          </span>
+        )}
+        {wasTranslated && (
+          <span style={{
+            fontSize: 9, fontWeight: 700, fontFamily: "var(--font-mono)",
+            padding: "1px 6px", borderRadius: 3,
+            background: "rgba(63,124,172,0.12)", color: "#3f7cac",
+            border: "1px solid rgba(63,124,172,0.2)",
+            letterSpacing: "0.03em",
+          }}>
+            ✦ Gemini 3.5
+          </span>
         )}
         <span style={{ fontFamily: "var(--font-mono)", opacity: 0.45, marginLeft: "auto" }}>#{turn.turn_id}</span>
       </div>
+
       <div className={isShopper ? "turn-bubble-shopper" : "turn-bubble-agent"}>
         <p className="turn-text">{turn.original}</p>
         {isShopper && turn.english && turn.english !== turn.original && (
@@ -29,7 +46,6 @@ export function TranscriptTurn({ turn }: { turn: Turn }) {
             }}>
               {turn.sentiment.label}
             </span>
-            {/* Frustration bar */}
             <div style={{ flex: 1, height: 3, borderRadius: 2, background: "#e8e4d8", overflow: "hidden" }}>
               <div style={{ width: `${frustPct}%`, height: "100%", background: frustColor, borderRadius: "inherit", transition: "width 400ms ease" }} />
             </div>

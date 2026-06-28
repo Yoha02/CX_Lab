@@ -203,6 +203,7 @@ button, input, textarea { font: inherit; }
   flex-direction: column;
   gap: 14px;
   min-height: 380px;
+  background: rgba(250, 248, 244, 0.92); /* warmer than the analysis panels */
 }
 
 .call-header {
