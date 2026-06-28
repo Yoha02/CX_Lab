@@ -1477,6 +1477,58 @@ dd {
   font-size: 28px;
 }
 
+.db-receipt-card {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.7fr) minmax(0, 1.3fr);
+  gap: 18px;
+  align-items: center;
+  margin-top: 14px;
+  padding: 18px;
+  border: 1px solid rgba(63, 124, 172, 0.26);
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--blue-soft), var(--panel));
+  box-shadow: var(--shadow);
+}
+
+.db-receipt-card h3 {
+  margin: 8px 0;
+}
+
+.db-receipt-card p {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.db-receipt-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.db-receipt-grid div {
+  min-height: 88px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.db-receipt-grid span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.db-receipt-grid strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 18px;
+  line-height: 1.16;
+  overflow-wrap: anywhere;
+}
+
 .dream-board {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -1925,7 +1977,9 @@ dd {
   .prune-grid,
   .analytics-grid,
   .dream-board,
-  .evidence-strip {
+  .evidence-strip,
+  .db-receipt-card,
+  .db-receipt-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -1978,6 +2032,8 @@ dd {
   .analytics-grid,
   .dream-board,
   .evidence-strip,
+  .db-receipt-card,
+  .db-receipt-grid,
   .history-run-row,
   .table-row {
     grid-template-columns: 1fr;

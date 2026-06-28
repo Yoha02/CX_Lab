@@ -33,6 +33,7 @@ const runDream = document.querySelector("#runDream");
 const historyTabs = [...document.querySelectorAll(".history-tab")];
 const historyPanels = [...document.querySelectorAll(".history-panel")];
 const historyCanvas = document.querySelector("#historyExperimentCanvas");
+const dbReceipt = document.querySelector("#dbReceipt");
 
 const API_BASE = "http://127.0.0.1:8000";
 const WS_BASE = API_BASE.replace(/^http/, "ws");
@@ -166,6 +167,15 @@ function setIconButton(button, icon, label) {
   button.innerHTML = iconMarkup[icon];
   button.setAttribute("aria-label", label);
   button.setAttribute("title", label);
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 const titles = {
@@ -921,6 +931,28 @@ async function apiFetch(path, options = {}) {
   return response.json();
 }
 
+function stampUniqueDemoRun(result, success) {
+  const sourceSessionId = result.session_id;
+  const sourceRunId = result.run_id;
+  const suffix = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  const runKind = success ? "contained" : "failed";
+  const sessionType = demoState.voiceMode === "simulated" ? "simulated_voice" : "live_call";
+
+  return {
+    ...result,
+    session_id: `sess_ui_${runKind}_${suffix}`,
+    run_id: `run_ui_${runKind}_${suffix}`,
+    session_type: sessionType,
+    metadata: {
+      ...(result.metadata || {}),
+      source: "ui_final",
+      source_session_id: sourceSessionId,
+      source_run_id: sourceRunId,
+      saved_at: new Date().toISOString()
+    }
+  };
+}
+
 async function hydrateApiState() {
   try {
     await apiFetch("/api/health");
@@ -1117,26 +1149,83 @@ function renderPruningReview(success) {
   `;
 }
 
+function renderDbReceipt({ status, result = null, savedRun = null, profileRuns = [], similarFailures = [], error = null }) {
+  if (!dbReceipt) return;
+  const profileId = result?.metadata?.profile_id || savedRun?.profile_id || "prof_maya_001";
+  const sessionId = result?.session_id || savedRun?.session_id || "pending";
+  const contained = result?.outcome?.contained ?? savedRun?.outcome?.contained;
+  const hasEmbedding = Boolean(savedRun?.embedding || result?.embedding);
+  const vectorCopy = contained === true
+    ? "not needed"
+    : hasEmbedding
+      ? "embedding stored"
+      : status === "saved"
+        ? "embedding queued"
+        : "pending";
+  const similarCopy = contained === true
+    ? "success run"
+    : similarFailures.length
+      ? `${similarFailures.length} matches`
+      : status === "saved"
+        ? "0 matches"
+        : "pending";
+  const heading = status === "saved"
+    ? "Latest run saved before dream pass"
+    : status === "error"
+      ? "DB write fallback"
+      : "Writing conversation to memory";
+  const description = status === "saved"
+    ? "This receipt is read back from DigitalOcean Postgres. Failed runs carry embeddings so the offline pass can retrieve similar failure patterns before compiling a patch."
+    : status === "error"
+      ? `Could not confirm the DB write: ${escapeHtml(error?.message || error || "unknown error")}`
+      : "Saving the evaluated conversation into conversation_runs before running the offline dream pass.";
+
+  dbReceipt.innerHTML = `
+    <div>
+      <span class="eyebrow">DigitalOcean memory write</span>
+      <h3>${escapeHtml(heading)}</h3>
+      <p>${description}</p>
+    </div>
+    <div class="db-receipt-grid">
+      <div><span>Postgres run</span><strong>${escapeHtml(sessionId)}</strong></div>
+      <div><span>Vector state</span><strong>${escapeHtml(vectorCopy)}</strong></div>
+      <div><span>Profile history</span><strong>${profileRuns.length ? `${profileRuns.length} Maya runs` : escapeHtml(profileId)}</strong></div>
+      <div><span>Similar failures</span><strong>${escapeHtml(similarCopy)}</strong></div>
+    </div>
+  `;
+}
+
 async function processCurrentCall() {
   setNavCollapsed(true);
   const success = demoState.activeCall === "success";
   renderPruningReview(success);
+  renderDbReceipt({ status: "saving" });
   try {
     if (!demoState.apiOnline) throw new Error("API offline");
-    const result = await apiFetch("/api/demo/build-result", {
+    const fixtureResult = await apiFetch("/api/demo/build-result", {
       method: "POST",
       body: JSON.stringify({ success })
     });
+    const result = stampUniqueDemoRun(fixtureResult, success);
     demoState.currentResult = result;
     await apiFetch("/api/runs", {
       method: "POST",
       body: JSON.stringify(result)
     });
+    const savedRun = await apiFetch(`/api/runs/${encodeURIComponent(result.session_id)}`).catch(() => null);
+    const profileId = result.metadata?.profile_id || "prof_maya_001";
+    const profileRuns = await apiFetch(`/api/profiles/${encodeURIComponent(profileId)}/runs`).catch(() => []);
+    const transcriptText = (result.turns || []).map((turn) => `${turn.speaker}: ${turn.text}`).join("\n");
+    const similarFailures = success
+      ? []
+      : await apiFetch(`/api/runs/similar-failures?limit=3&text=${encodeURIComponent(transcriptText)}`).catch(() => []);
     demoState.currentRunSaved = true;
+    renderDbReceipt({ status: "saved", result, savedRun, profileRuns, similarFailures });
     setApiBadge("online", success ? "success run saved" : "failure run saved");
   } catch (error) {
     demoState.currentRunSaved = false;
     demoState.lastApiError = error;
+    renderDbReceipt({ status: "error", error });
     setApiBadge("offline", "local pruning");
     console.warn("[ui-final] process call fallback", error);
   }
@@ -1284,6 +1373,7 @@ resetDemo.addEventListener("click", () => {
   liveProfile.classList.remove("identified");
   liveProfile.innerHTML = `<div class="empty-profile"><span>Awaiting caller identification</span><p>Start the mic to identify the caller, transcribe the voice stream, and route the live branch.</p></div>`;
   renderPredictions([["late delivery", 44], ["refund request", 24], ["tracking ask", 20], ["other", 12]]);
+  renderDbReceipt({ status: "pending" });
   updateVoiceModeUi();
   setNavCollapsed(false);
   switchView("home");
