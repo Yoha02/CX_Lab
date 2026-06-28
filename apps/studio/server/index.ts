@@ -1,13 +1,23 @@
 import express from "express";
 import { createServer } from "node:http";
 import { WebSocketServer } from "ws";
-
-const PORT = Number(process.env.PORT ?? 3000);
+import { selectTts } from "./providers/tts/index.js";
+import { env } from "./lib/env.js";
 
 const app = express();
 app.use(express.json({ limit: "10mb" }));
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
+
+app.post("/api/tts", async (req, res) => {
+  try {
+    const { text, provider } = req.body as { text: string; provider?: "google" | "elevenlabs" };
+    if (!text) return res.status(400).json({ error: "text required" });
+    const tts = selectTts(provider ?? env.ttsProvider);
+    const out = await tts.synthesize(text);
+    res.json(out);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
 
 const server = createServer(app);
 const wss = new WebSocketServer({ noServer: true });
@@ -26,7 +36,7 @@ wss.on("connection", (ws) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`http://localhost:${PORT}`);
-  console.log(`ws ws://localhost:${PORT}/api/live`);
+server.listen(env.port, () => {
+  console.log(`http://localhost:${env.port}`);
+  console.log(`ws ws://localhost:${env.port}/api/live`);
 });
