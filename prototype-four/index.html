@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CX_lab Dojo - Prototype Four</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="platform-shell">
+    <aside class="app-nav" aria-label="Primary navigation">
+      <div class="mark">CX</div>
+      <button class="nav-item active" data-view="personas" type="button"><span>PE</span><strong>Personas</strong></button>
+      <button class="nav-item" data-view="history" type="button"><span>HI</span><strong>History</strong></button>
+      <button class="nav-item" data-view="live" type="button"><span>LC</span><strong>Live call</strong></button>
+      <button class="nav-item" data-view="pruning" type="button"><span>PR</span><strong>Pruning</strong></button>
+      <button class="nav-item" data-view="dream" type="button"><span>DR</span><strong>Dream pass</strong></button>
+      <button class="nav-item" data-view="analytics" type="button"><span>AN</span><strong>Analytics</strong></button>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">CX_lab Dojo</div>
+          <h1 id="pageTitle">Persona experiment canvas</h1>
+        </div>
+        <div class="top-actions">
+          <button class="ghost-btn" id="resetDemo" type="button">Reset demo</button>
+          <button class="primary-btn" id="primaryAction" type="button">Generate 128 arms</button>
+        </div>
+      </header>
+
+      <section class="content-view active" id="personasView" data-view="personas">
+        <aside class="left-panel">
+          <div class="panel-title">
+            <span>Persona library</span>
+            <strong>3 active</strong>
+          </div>
+          <button class="persona-row active" data-persona="maya" type="button">
+            <span class="avatar">MR</span>
+            <span><strong>Maya R.</strong><small>VIP parent - loyal shopper</small></span>
+          </button>
+          <button class="persona-row" data-persona="alex" type="button">
+            <span class="avatar blue">AX</span>
+            <span><strong>Alex T.</strong><small>First-time buyer</small></span>
+          </button>
+          <button class="persona-row" data-persona="jordan" type="button">
+            <span class="avatar amber">JD</span>
+            <span><strong>Jordan K.</strong><small>Discount shopper</small></span>
+          </button>
+          <div class="mini-card">
+            <span>Canvas mode</span>
+            <strong>Expandable experiments</strong>
+            <p>Persona root expands to 10 strategy families. Each family can expand to 10 child experiments.</p>
+          </div>
+        </aside>
+
+        <section class="canvas-wrap">
+          <div class="canvas-toolbar">
+            <div>
+              <span class="badge green">128 generated</span>
+              <span class="badge">36 replayed</span>
+              <span class="badge red">14 pruned</span>
+              <span class="badge blue">1 champion</span>
+            </div>
+            <div>
+              <button class="small-btn" id="collapseNodes" type="button">Collapse</button>
+              <button class="small-btn" id="expandNodes" type="button">Expand visible</button>
+              <button class="small-btn dark" id="createExperiment" type="button">Create experiment</button>
+            </div>
+          </div>
+          <div class="experiment-canvas" id="experimentCanvas" aria-label="Experiment node canvas"></div>
+        </section>
+
+        <aside class="right-panel">
+          <div class="panel-title">
+            <span>Inspector</span>
+            <strong id="inspectorStatus">persona root</strong>
+          </div>
+          <div id="inspectorBody" class="inspector-body"></div>
+        </aside>
+      </section>
+
+      <section class="content-view" id="historyView" data-view="history">
+        <aside class="persona-detail">
+          <button class="collapse-btn" type="button">Collapse nav</button>
+          <div class="profile-hero">
+            <span class="avatar large">MR</span>
+            <h2>Maya R.</h2>
+            <p>Gold loyalty shopper. Birthday gift deadline. Prior unresolved ticket.</p>
+          </div>
+          <dl class="profile-grid">
+            <div><dt>LTV</dt><dd>$2.4k</dd></div>
+            <div><dt>Risk</dt><dd>High</dd></div>
+            <div><dt>Mode</dt><dd>VIP parent</dd></div>
+            <div><dt>Need</dt><dd>Gift by Sat</dd></div>
+          </dl>
+          <div class="mini-card">
+            <span>Last cluster</span>
+            <strong>urgent event deadline</strong>
+            <p>Policy-first response produced a cancel/refund threat.</p>
+          </div>
+        </aside>
+
+        <section class="history-main">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Interaction history</span>
+              <h2>Maya's experiment trace</h2>
+            </div>
+            <button class="primary-btn" data-view-target="live" type="button">Start similar live call</button>
+          </div>
+
+          <div class="history-grid">
+            <article class="experiment-detail selected">
+              <span>Selected node</span>
+              <h3>policy_first_shipping_explanation_v1</h3>
+              <p>Agent explained shipping windows before checking rescue inventory.</p>
+              <div class="score-line"><span>Containment</span><strong>39%</strong></div>
+              <div class="score-line"><span>NPS proxy</span><strong>24</strong></div>
+              <button class="small-btn dark" data-view-target="history" type="button">View transcript</button>
+            </article>
+            <article class="experiment-detail">
+              <span>Promoted node</span>
+              <h3>deadline_inventory_first_v1</h3>
+              <p>Acknowledge deadline, look up inventory, preserve refund fallback.</p>
+              <div class="score-line"><span>Containment</span><strong>81%</strong></div>
+              <div class="score-line"><span>NPS proxy</span><strong>68</strong></div>
+            </article>
+            <article class="experiment-detail">
+              <span>Preserved node</span>
+              <h3>overnight_offer_v2</h3>
+              <p>Works when inventory exists but customer is price sensitive.</p>
+              <div class="score-line"><span>Containment</span><strong>68%</strong></div>
+              <div class="score-line"><span>NPS proxy</span><strong>49</strong></div>
+            </article>
+          </div>
+
+          <div class="conversation-and-map">
+            <div class="transcript-card">
+              <div class="panel-title"><span>Previous transcript</span><strong>not contained</strong></div>
+              <div class="transcript static">
+                <article class="turn shopper"><span>Maya</span><p>My daughter's birthday is tomorrow and this still has not arrived.</p></article>
+                <article class="turn agent"><span>Agent</span><p>Standard shipping usually takes 3-5 business days.</p></article>
+                <article class="turn shopper"><span>Maya</span><p>No puedo seguir explicando esto. Just cancel it.</p></article>
+                <article class="turn system"><span>Gemini translate</span><p>I cannot keep explaining this. Signal: frustration spike + urgent family event.</p></article>
+              </div>
+            </div>
+            <div class="mini-map-card">
+              <div class="panel-title"><span>Prune / promote</span><strong>last conversation</strong></div>
+              <svg viewBox="0 0 560 260" class="mini-flow" aria-label="Prune promote map">
+                <path class="flow good" d="M70 130 C170 50, 280 58, 410 75" />
+                <path class="flow keep" d="M70 130 C180 135, 280 135, 410 130" />
+                <path class="flow bad" d="M70 130 C180 205, 290 210, 410 195" />
+                <g class="flow-node root" transform="translate(70 130)"><circle r="28"></circle><text y="5">late</text></g>
+                <g class="flow-node good" transform="translate(410 75)"><circle r="32"></circle><text y="4">inventory</text></g>
+                <g class="flow-node keep" transform="translate(410 130)"><circle r="28"></circle><text y="4">offer</text></g>
+                <g class="flow-node bad" transform="translate(410 195)"><circle r="28"></circle><text y="4">policy</text></g>
+              </svg>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="content-view" id="liveView" data-view="live">
+        <aside class="live-profile" id="liveProfile">
+          <div class="empty-profile">
+            <span>Awaiting caller identification</span>
+            <p>LiveKit audio is simulated here. Persona will populate after greeting.</p>
+          </div>
+        </aside>
+        <section class="live-console">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Live experiment</span>
+              <h2 id="liveTitle">Voice containment workspace</h2>
+            </div>
+            <div class="top-actions">
+              <button class="ghost-btn" id="seedCall" type="button">Seed mock call</button>
+              <button class="primary-btn" id="processCall" type="button">Process call</button>
+            </div>
+          </div>
+          <div class="voice-stage">
+            <div class="waveform" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="transcript live" id="liveTranscript"></div>
+          </div>
+        </section>
+        <aside class="prediction-panel">
+          <div class="panel-title"><span>Before shopper speaks</span><strong>next intent</strong></div>
+          <div id="predictionBars" class="prediction-bars"></div>
+          <div class="sentiment-meter">
+            <span>Sentiment</span>
+            <strong id="sentimentValue">neutral</strong>
+            <div><b id="sentimentFill"></b></div>
+          </div>
+          <div class="metrics-stack">
+            <div><span>Containment</span><strong id="liveContainment">52%</strong></div>
+            <div><span>NPS proxy</span><strong id="liveNps">31</strong></div>
+            <div><span>Recontact risk</span><strong id="liveRisk">42%</strong></div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="content-view" id="pruningView" data-view="pruning">
+        <div class="wide-panel">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Call evaluation</span>
+              <h2>What gets kept, pruned, and sent to dream state</h2>
+            </div>
+            <button class="primary-btn" data-view-target="personas" type="button">Zoom out to canvas</button>
+          </div>
+          <div class="prune-grid">
+            <article class="prune-card keep"><span>Keep</span><h3>Urgent event signal</h3><p>Deadline and frustration markers are retained as cluster evidence.</p></article>
+            <article class="prune-card keep"><span>Keep</span><h3>Translation signal</h3><p>Spanish frustration phrase maps to high-risk sentiment movement.</p></article>
+            <article class="prune-card prune"><span>Prune</span><h3>Policy-first opening</h3><p>Repeatedly increases cancel/refund threats before rescue options.</p></article>
+            <article class="prune-card promote"><span>Promote</span><h3>Inventory-first recovery</h3><p>Best candidate for Maya-like urgent delivery calls.</p></article>
+          </div>
+          <div class="evidence-strip">
+            <div><span>Prediction quality</span><strong>70%</strong></div>
+            <div><span>Sentiment delta</span><strong>-0.57</strong></div>
+            <div><span>NPS proxy</span><strong>24</strong></div>
+            <div><span>Pruning decision</span><strong>soft prune</strong></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-view" id="dreamView" data-view="dream">
+        <div class="wide-panel">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Offline consolidation</span>
+              <h2>Dream pass visual pipeline</h2>
+            </div>
+            <button class="primary-btn" id="runDream" type="button">Run dream pass</button>
+          </div>
+          <div class="dream-board">
+            <article class="dream-column active"><span>1</span><h3>Cluster calls</h3><p>Maya, Alex, and Jordan share urgent-event late delivery failures.</p><strong>36 calls</strong></article>
+            <article class="dream-column"><span>2</span><h3>Compare intents</h3><p>Current intent flow overweights policy explanation too early.</p><strong>14 failures</strong></article>
+            <article class="dream-column"><span>3</span><h3>Patch playbook</h3><p>Move inventory lookup before policy explanation for urgent events.</p><strong>+19% lift</strong></article>
+            <article class="dream-column"><span>4</span><h3>Approval lane</h3><p>Automated recommendation, manual approval optional for production.</p><strong>ready</strong></article>
+            <article class="dream-column"><span>5</span><h3>Update flows</h3><p>Persona wording adapts, shared intent policy updates globally.</p><strong>Gen 2</strong></article>
+          </div>
+          <div class="sankey-card">
+            <h3>Expected outcome shift after playbook update</h3>
+            <svg viewBox="0 0 900 300" class="sankey" aria-label="Conversation outcome Sankey">
+              <path class="sankey-link green" d="M80 90 C280 80, 410 60, 620 55" />
+              <path class="sankey-link blue" d="M80 120 C290 120, 430 140, 620 135" />
+              <path class="sankey-link amber" d="M80 150 C290 170, 430 190, 620 205" />
+              <path class="sankey-link red" d="M80 180 C290 230, 430 250, 620 260" />
+              <rect x="55" y="75" width="28" height="125" rx="6"></rect>
+              <text x="96" y="142">Voice calls</text>
+              <rect class="green" x="620" y="35" width="30" height="44" rx="6"></rect><text x="665" y="62">contained resolution +29 pts</text>
+              <rect class="blue" x="620" y="116" width="30" height="38" rx="6"></rect><text x="665" y="140">partial resolution</text>
+              <rect class="amber" x="620" y="190" width="30" height="34" rx="6"></rect><text x="665" y="212">redirected</text>
+              <rect class="red" x="620" y="247" width="30" height="30" rx="6"></rect><text x="665" y="267">escalated reduced</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-view" id="analyticsView" data-view="analytics">
+        <div class="wide-panel">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Quality dashboard</span>
+              <h2>Advanced containment scorecard</h2>
+            </div>
+            <button class="primary-btn" data-view-target="live" type="button">Run next call</button>
+          </div>
+          <div class="analytics-grid">
+            <article><span>Total sessions</span><strong>213,323</strong><p>Retail voice and chat sample.</p></article>
+            <article><span>Advanced containment</span><strong>81%</strong><p>Resolved without human and low recontact risk.</p></article>
+            <article><span>Quality score</span><strong>84%</strong><p>Prediction, sentiment, tool timing, and NPS proxy.</p></article>
+            <article><span>Escalation rate</span><strong>12%</strong><p>Down after dream patch.</p></article>
+          </div>
+          <div class="run-table">
+            <div class="table-row head"><span>Experiment group</span><span>Avg containment</span><span>NPS proxy</span><span>Last run</span></div>
+            <div class="table-row"><span>deadline_inventory_first</span><span><b class="bar good"></b>81%</span><span>68</span><span>Gen 2 live</span></div>
+            <div class="table-row"><span>overnight_offer</span><span><b class="bar keep"></b>68%</span><span>49</span><span>Held out</span></div>
+            <div class="table-row"><span>policy_first_shipping</span><span><b class="bar bad"></b>39%</span><span>24</span><span>Pruned</span></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
