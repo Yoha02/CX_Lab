@@ -2,6 +2,7 @@ import express from "express";
 import { createServer } from "node:http";
 import { WebSocketServer } from "ws";
 import { selectTts } from "./providers/tts/index.js";
+import { detectAndTranslate } from "./providers/translate.js";
 import { env } from "./lib/env.js";
 
 const app = express();
@@ -16,6 +17,14 @@ app.post("/api/tts", async (req, res) => {
     const tts = selectTts(provider ?? env.ttsProvider);
     const out = await tts.synthesize(text);
     res.json(out);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+app.post("/api/translate", async (req, res) => {
+  try {
+    const { text } = req.body as { text: string };
+    if (!text) return res.status(400).json({ error: "text required" });
+    res.json(await detectAndTranslate(text));
   } catch (e: any) { res.status(500).json({ error: e.message }); }
 });
 
