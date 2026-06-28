@@ -1,0 +1,13 @@
+{
+  "name": "@cx-lab/dream",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@cx-lab/memory": "^1.0.0",
+    "@cx-lab/gemini": "^1.0.0"
+  }
+}

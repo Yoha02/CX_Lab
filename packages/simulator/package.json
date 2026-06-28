@@ -1,0 +1,16 @@
+{
+  "name": "@cx-lab/simulator",
+  "version": "1.0.0",
+  "main": "dist/testBackend.js",
+  "type": "module",
+  "scripts": {
+    "test": "tsx src/testBackend.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@cx-lab/contracts": "^1.0.0",
+    "@cx-lab/memory": "^1.0.0",
+    "@cx-lab/dream": "^1.0.0",
+    "@cx-lab/infra-db": "^1.0.0"
+  }
+}

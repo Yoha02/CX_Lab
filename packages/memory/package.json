@@ -1,0 +1,13 @@
+{
+  "name": "@cx-lab/memory",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@cx-lab/contracts": "^1.0.0",
+    "@cx-lab/digitalocean": "^1.0.0"
+  }
+}

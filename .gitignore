@@ -1,0 +1,21 @@
+# Node.js dependencies
+node_modules/
+
+# Compiled JavaScript outputs
+dist/
+out/
+build/
+
+# Environment configurations containing secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# TypeScript compilation caching files
+*.tsbuildinfo

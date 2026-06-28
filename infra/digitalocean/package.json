@@ -1,0 +1,14 @@
+{
+  "name": "@cx-lab/infra-db",
+  "version": "1.0.0",
+  "main": "dist/initDb.js",
+  "type": "module",
+  "scripts": {
+    "init-db": "tsx src/initDb.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@cx-lab/digitalocean": "^1.0.0",
+    "dotenv": "^16.4.1"
+  }
+}

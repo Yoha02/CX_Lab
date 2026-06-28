@@ -1,0 +1,20 @@
+{
+  "name": "cx-lab",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "packages/integrations/*",
+    "infra/*"
+  ],
+  "scripts": {
+    "api:dev": "npm run dev --workspace=apps/api",
+    "api:init-db": "npm run init-db --workspace=infra/digitalocean",
+    "api:test": "npm run test --workspace=packages/simulator"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "tsx": "^4.7.1"
+  }
+}
