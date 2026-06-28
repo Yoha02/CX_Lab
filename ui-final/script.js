@@ -130,6 +130,44 @@ apiBadge.className = "api-badge";
 apiBadge.textContent = "API checking";
 pageTitle.insertAdjacentElement("afterend", apiBadge);
 
+const iconMarkup = {
+  micOff: `
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 9v3a3 3 0 0 0 5.12 2.12" />
+      <path d="M15 9.34V5a3 3 0 0 0-5.94-.6" />
+      <path d="M17 11a5 5 0 0 1-.9 2.86" />
+      <path d="M7 11a5 5 0 0 0 8.16 3.88" />
+      <path d="M12 19v3" />
+      <path d="M8 22h8" />
+      <path d="M3 3l18 18" />
+    </svg>
+  `,
+  stop: `
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="7" y="7" width="10" height="10" rx="2" />
+    </svg>
+  `,
+  play: `
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+      <path d="M8 5.8c0-.9 1-1.45 1.76-.96l8.25 5.2a1.14 1.14 0 0 1 0 1.92l-8.25 5.2A1.14 1.14 0 0 1 8 16.2V5.8Z" />
+    </svg>
+  `,
+  backup: `
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 12a9 9 0 1 0 3-6.7" />
+      <path d="M3 4v5h5" />
+      <path d="M9 12h6" />
+      <path d="M12 9v6" />
+    </svg>
+  `
+};
+
+function setIconButton(button, icon, label) {
+  button.innerHTML = iconMarkup[icon];
+  button.setAttribute("aria-label", label);
+  button.setAttribute("title", label);
+}
+
 const titles = {
   home: "Home",
   personas: "Persona experiment planning",
@@ -622,9 +660,9 @@ function appendSystemTurn(label, text) {
 function updateVoiceModeUi() {
   const live = demoState.voiceMode === "live";
   voiceModeToggle.textContent = live ? "Mode: Live mic" : "Mode: Simulated";
-  micToggle.textContent = live ? "Start mic" : "Run simulation";
   micToggle.classList.toggle("recording", false);
-  seedCall.textContent = live ? "Run simulated backup" : "Seed mock call";
+  setIconButton(micToggle, live ? "micOff" : "play", live ? "Start mic" : "Run simulation");
+  setIconButton(seedCall, "backup", live ? "Run simulated backup" : "Seed mock call");
   voiceProvider.textContent = live
     ? "Gemini Live Translate + ElevenLabs TTS"
     : "Scripted fixture + API probes";
@@ -816,7 +854,7 @@ async function startLiveMic() {
   setVoiceStatus("live", "Listening");
   waveform.classList.remove("idle");
   micToggle.classList.add("recording");
-  micToggle.textContent = "Stop mic";
+  setIconButton(micToggle, "stop", "Stop mic");
   demoState.micHandle = await startMicCapture(sendAudioChunk);
   demoState.micActive = true;
 }
@@ -828,7 +866,7 @@ async function stopLiveMic() {
   }
   demoState.micActive = false;
   micToggle.classList.remove("recording");
-  micToggle.textContent = "Start mic";
+  setIconButton(micToggle, "micOff", "Start mic");
   waveform.classList.add("idle");
   setVoiceStatus("live", "Processing utterance");
   const captured = demoState.liveOutputBuffer || demoState.liveInputBuffer;
@@ -852,7 +890,7 @@ async function toggleMic() {
     console.warn("[ui-final] mic path failed", error);
     setVoiceStatus("error", "Mic unavailable - use backup");
     micToggle.classList.remove("recording");
-    micToggle.textContent = "Start mic";
+    setIconButton(micToggle, "micOff", "Start mic");
     waveform.classList.add("idle");
   }
 }
