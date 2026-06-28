@@ -6,7 +6,7 @@ This document defines the core positioning, value proposition, and elevator pitc
 ---
 
 ## 1. The Core Pitch (One-Sentence Elevator Pitch)
-> "**RACX** (Recursive Autonomous Customer Experience) is an agentic voice platform that achieves advanced customer containment through a **Recursive Self-Improvement (RSI)** loop—vectorizing containment failures, clustering behavioral patterns, and automatically deploying optimized playbook patches to production so AI agents get smarter with every customer conversation."
+> "**RACX** (Recursive Autonomous Customer Experience) is a customer experience platform built on **Continuous Resolution Loops, Engineered for Containment**. It moves the needle from *'answering a question'* to *'solving the underlying ticket'* by vectorizing containment failures, clustering behavioral patterns, and automatically deploying optimized playbook patches to production so AI agents get smarter with every customer conversation."
 
 ---
 
@@ -15,12 +15,12 @@ This document defines the core positioning, value proposition, and elevator pitc
 
 When an AI agent fails to contain a customer, the conversation is escalated to a human, and that valuable transcript is buried in a database. The agent's instructions remain static, destined to repeat the same mistake on the next call.
 
-**RACX** breaks this ceiling with the world’s first **Recursive Autonomous Customer Experience**. 
+**RACX** breaks this ceiling with **Continuous Resolution Loops, Engineered for Containment**. 
 
-Our platform runs a three-loop recursive engine:
+We move the needle from simply *'answering a question'* to *'solving the underlying ticket'*. Our platform runs a three-loop recursive engine:
 1. **Live Prediction:** Blends LLM confidence with historical customer priors to anticipate customer frustration before it happens.
 2. **Autonomous Pruning:** Evaluates concluding calls, instantly identifying and soft-pruning response paths that led to escalations.
-3. **Behavioral dreaming (RSI):** Dynamically groups failure runs from different customer personas into a single behavioral cluster, drafts a consolidated playbook patch, and deploys it back to production.
+3. **Behavioral Dreaming (RSI):** Dynamically groups failure runs from different customer personas into a single behavioral cluster, drafts a consolidated playbook patch, and deploys it back to production.
 
 With **RACX**, customer experience isn't just automated—it is **recursively self-improving**."
 
@@ -34,5 +34,5 @@ Traditional support agents rely on static playbooks. If a playbook explains ship
 ### II. Cross-Persona Behavioral Clustering (The Market Gap)
 Other platforms try to personalize fixes based on isolated customer profiles (e.g. Loyal Shopper vs. First-time Buyer). **RACX** realizes that *personas personalize the fix, but failure clusters discover the fix*. By clustering across personas, we find the common root breakdown.
 
-### III. Recursive Self-Improvement / RSI (The Solution)
+### III. Continuous Resolution Loops (The Solution)
 The database isn't a graveyard for logs—it is the memory engine. By utilizing `pgvector` similarity search and LLM patch compilation, the system recursively optimizes playbook rules and pushes hot-fixes back to live voice runs, achieving continuous containment gains.

@@ -14,7 +14,7 @@ This deck outlines the presentation starting from **Slide 4** (the first content
 
 ### Content
 # RACX
-## Recursive Autonomous Customer Experience via Self-Improving Voice Agents
+## Customer Experience Platform via Continuous Resolution Loops, Engineered for Containment
 
 ---
 
@@ -24,12 +24,12 @@ This deck outlines the presentation starting from **Slide 4** (the first content
 * **Body Text Size:** 32pt Google Sans Medium
 
 ### Content
-> "Static customer service playbooks hit **The Static Containment Ceiling**: AI agents repeat the same failures indefinitely because they cannot learn."
+> "Static playbooks force AI agents to hit **The Static Containment Ceiling**: they repeat the same failures because they cannot learn."
 
 ### Context Points (24pt / 20pt)
-* support transcripts are buried in databases, leaving agent rules frozen.
-* Single-persona optimizations create silos that fail to generalize across customer journeys.
-* Rigorous support guidelines force a broken trade-off: premature human escalation or customer frustration.
+* Support transcripts are buried in databases, leaving agent rules frozen.
+* Traditional support tools focus on *"answering a question"* rather than *"solving the underlying ticket."*
+* Rigorous guidelines force a broken trade-off: premature human escalation or customer frustration.
 
 ---
 
@@ -53,7 +53,7 @@ This deck outlines the presentation starting from **Slide 4** (the first content
 * **Heading Size:** 48pt Google Sans Medium
 * **Body Text Size:** 24pt Google Sans Medium
 
-### The 3-Loop Recursive Self-Improvement (RSI) Engine
+### The 3-Loop Continuous Resolution Loop Engine
 
 * **1. Vectorized Capture (G Blue):** 
   Failed calls are automatically embedded and saved using `pgvector`, creating a real-time semantic memory search for live containment retrieval.
