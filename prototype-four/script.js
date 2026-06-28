@@ -3,6 +3,7 @@ const navItems = [...document.querySelectorAll(".nav-item")];
 const pageTitle = document.querySelector("#pageTitle");
 const primaryAction = document.querySelector("#primaryAction");
 const resetDemo = document.querySelector("#resetDemo");
+const brandMark = document.querySelector("#brandMark");
 const navCollapse = document.querySelector("#navCollapse");
 const collapseArrows = navCollapse.querySelector(".collapse-arrows");
 const collapseLabel = navCollapse.querySelector("strong");
@@ -112,6 +113,7 @@ let dreamTimer = null;
 
 function setNavCollapsed(collapsed) {
   document.body.classList.toggle("nav-collapsed", collapsed);
+  brandMark.textContent = collapsed ? "CXL" : "CX LAB";
   navCollapse.setAttribute("aria-expanded", String(!collapsed));
   collapseArrows.textContent = collapsed ? ">>" : "<<";
   collapseLabel.textContent = collapsed ? "Show nav" : "Hide nav";
