@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CX_lab Dojo - Prototype Three</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="side-rail" aria-label="Persona and learning context">
+      <div class="brand-lockup">
+        <div class="brand-mark">CX</div>
+        <div>
+          <h1>CX_lab Dojo</h1>
+          <p>Advanced containment lab</p>
+        </div>
+      </div>
+
+      <section class="panel profile-panel">
+        <div class="section-kicker">Hero Persona</div>
+        <h2>Maya R.</h2>
+        <p class="muted">Loyal shopper / VIP parent. Birthday gift delayed. Prior unresolved issue.</p>
+        <dl class="profile-grid">
+          <div><dt>LTV</dt><dd>$2.4k</dd></div>
+          <div><dt>Risk</dt><dd>High</dd></div>
+          <div><dt>Intent</dt><dd>Late delivery</dd></div>
+          <div><dt>Goal</dt><dd>Gift by Sat</dd></div>
+        </dl>
+      </section>
+
+      <section class="panel cluster-panel">
+        <div class="section-kicker">Dream Cluster</div>
+        <h3>Urgent event deadline</h3>
+        <p class="muted">Policy-first shipping explanations trigger cancel/refund threats across similar shopper journeys.</p>
+        <div class="cluster-key">late_delivery:urgent_event_deadline:policy_first</div>
+        <div class="persona-stack">
+          <span>Maya - loyal shopper</span>
+          <span>Alex - first-time buyer</span>
+          <span>Jordan - discount shopper</span>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-kicker">Current Memory</div>
+        <ul class="memory-list">
+          <li>Detect event deadlines as high urgency.</li>
+          <li>Track sentiment before and after each agent strategy.</li>
+          <li>Promote playbooks that improve containment and NPS proxy.</li>
+        </ul>
+      </section>
+    </aside>
+
+    <main class="workbench">
+      <header class="top-bar">
+        <div>
+          <div class="section-kicker">Prototype Three</div>
+          <h2>From 128 experiments to one better call</h2>
+        </div>
+        <div class="action-row">
+          <button class="btn secondary" id="prevStep" type="button">Back</button>
+          <button class="btn primary" id="nextStep" type="button">Next step</button>
+          <button class="btn secondary" id="replayStep" type="button">Replay</button>
+        </div>
+      </header>
+
+      <nav class="journey-rail" aria-label="Demo journey">
+        <button class="journey-step active" data-step="0" type="button">
+          <span>1</span><strong>Persona</strong><small>load profile</small>
+        </button>
+        <button class="journey-step" data-step="1" type="button">
+          <span>2</span><strong>128 Experiments</strong><small>generate arms</small>
+        </button>
+        <button class="journey-step" data-step="2" type="button">
+          <span>3</span><strong>Live Call</strong><small>baseline branch</small>
+        </button>
+        <button class="journey-step" data-step="3" type="button">
+          <span>4</span><strong>Score</strong><small>prune evidence</small>
+        </button>
+        <button class="journey-step" data-step="4" type="button">
+          <span>5</span><strong>Dream Pass</strong><small>cluster update</small>
+        </button>
+        <button class="journey-step" data-step="5" type="button">
+          <span>6</span><strong>Next Iteration</strong><small>contained call</small>
+        </button>
+      </nav>
+
+      <section class="focus-card" aria-live="polite">
+        <div>
+          <div class="section-kicker" id="sceneKicker">Persona Loaded</div>
+          <h2 id="sceneTitle">Maya enters a high-risk late-delivery journey</h2>
+          <p id="sceneCopy">The system starts with persona context, current intent, urgency, and prior memory before picking a strategy arm.</p>
+        </div>
+        <div class="scene-status">
+          <span id="scenePhase">Step 1 of 6</span>
+          <strong id="sceneMetric">Risk high</strong>
+        </div>
+      </section>
+
+      <section class="experiment-strip">
+        <article class="funnel-card active" data-funnel="generated">
+          <span>Generated</span>
+          <strong>128</strong>
+          <small>candidate strategies</small>
+        </article>
+        <article class="funnel-card" data-funnel="replayed">
+          <span>Replayed</span>
+          <strong>36</strong>
+          <small>similar journeys</small>
+        </article>
+        <article class="funnel-card" data-funnel="failures">
+          <span>Failure cluster</span>
+          <strong>14</strong>
+          <small>policy-first escalations</small>
+        </article>
+        <article class="funnel-card" data-funnel="patches">
+          <span>Challengers</span>
+          <strong>6</strong>
+          <small>candidate patches</small>
+        </article>
+        <article class="funnel-card" data-funnel="champion">
+          <span>Champion</span>
+          <strong>1</strong>
+          <small>promoted playbook</small>
+        </article>
+      </section>
+
+      <section class="demo-grid">
+        <div class="panel main-panel">
+          <div class="panel-heading">
+            <div>
+              <div class="section-kicker" id="mainKicker">Experiment Pool</div>
+              <h3 id="mainTitle">Strategy arms for this persona-intent</h3>
+            </div>
+            <span class="pill" id="branchStatus">Policy arm selected</span>
+          </div>
+
+          <div class="scene scene-persona active" data-scene="0">
+            <div class="persona-overview">
+              <article>
+                <span class="mini-label">Journey state</span>
+                <strong>late_delivery + urgent_event_deadline</strong>
+                <p>Maya needs a birthday gift by tomorrow and has low patience for generic policy language.</p>
+              </article>
+              <article>
+                <span class="mini-label">Starting prediction</span>
+                <strong>cancel/refund risk rising</strong>
+                <p>Historical priors show event-deadline shoppers escalate when rescue options are delayed.</p>
+              </article>
+            </div>
+            <div class="callout-line">
+              <span>Goal</span>
+              <p>Pick an experiment arm that maximizes contained resolution, sentiment recovery, and NPS proxy.</p>
+            </div>
+          </div>
+
+          <div class="scene scene-experiments" data-scene="1">
+            <div class="experiment-grid" id="experimentGrid"></div>
+            <div class="selection-card">
+              <span class="mini-label">Selected baseline branch</span>
+              <strong>policy_first_shipping_explanation_v1</strong>
+              <p>Explain standard shipping policy before checking replacement inventory.</p>
+            </div>
+          </div>
+
+          <div class="scene scene-call" data-scene="2">
+            <div class="call-header">
+              <span class="status-copy"><span class="status-dot"></span>Simulated voice room active</span>
+              <span class="timer" id="timer">00:00</span>
+            </div>
+            <div class="waveform" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="transcript" id="transcript" aria-live="polite"></div>
+          </div>
+
+          <div class="scene scene-score" data-scene="3">
+            <div class="score-layout">
+              <article class="score-card fail">
+                <span>Advanced containment</span>
+                <strong>Failed</strong>
+                <p>Call avoided a human for a moment, but the shopper threatened cancellation and recontact risk stayed high.</p>
+              </article>
+              <article class="score-card">
+                <span>Pruned strategy</span>
+                <strong>policy_first</strong>
+                <p>Negative sentiment delta after the agent explained policy before looking for rescue options.</p>
+              </article>
+              <article class="score-card">
+                <span>Saved evidence</span>
+                <strong>cluster input</strong>
+                <p>Intent path, prediction miss, sentiment drop, tool delay, and failure mode are handed to offline dream state.</p>
+              </article>
+            </div>
+          </div>
+
+          <div class="scene scene-dream" data-scene="4">
+            <div class="dream-flow">
+              <article class="dream-step">
+                <span>1</span>
+                <strong>Cluster calls</strong>
+                <p>36 urgent-event late-delivery journeys across Maya, Alex, and Jordan.</p>
+              </article>
+              <article class="dream-step">
+                <span>2</span>
+                <strong>Find failure pattern</strong>
+                <p>Policy-first language triggered 14 cancel/refund threats and an average sentiment delta of -0.57.</p>
+              </article>
+              <article class="dream-step">
+                <span>3</span>
+                <strong>Score patch</strong>
+                <p>Deadline acknowledgement + inventory lookup beats policy-first on containment and NPS proxy.</p>
+              </article>
+              <article class="dream-step">
+                <span>4</span>
+                <strong>Promote playbook</strong>
+                <p>deadline_inventory_first_v1 becomes the recommended branch for urgent-event delivery calls.</p>
+              </article>
+            </div>
+          </div>
+
+          <div class="scene scene-improved" data-scene="5">
+            <div class="call-header">
+              <span class="status-copy"><span class="status-dot success"></span>Next iteration replay</span>
+              <span class="timer">Gen 2</span>
+            </div>
+            <div class="transcript replay-transcript">
+              <article class="turn shopper"><span>shopper</span><p>My daughter's birthday is tomorrow and this still has not arrived.</p></article>
+              <article class="turn agent"><span>agent</span><p>I see the birthday deadline. I am checking local replacement inventory before we discuss refund options.</p></article>
+              <article class="turn system"><span>tool preload</span><p>local inventory found. expedited replacement available.</p></article>
+              <article class="turn shopper"><span>shopper</span><p>Okay, reserve it. I just need to know I am not stuck if it misses.</p></article>
+              <article class="turn agent"><span>agent</span><p>Done. I reserved the replacement, upgraded delivery, and kept the refund fallback attached.</p></article>
+            </div>
+          </div>
+        </div>
+
+        <aside class="panel insight-panel">
+          <div class="section-kicker" id="rightKicker">Before Shopper Speaks</div>
+          <h3 id="rightTitle">Next-turn prediction</h3>
+          <div class="prediction-bars" id="predictionBars"></div>
+
+          <div class="sentiment-card">
+            <div>
+              <span>Sentiment</span>
+              <strong id="sentimentLabel">frustrated</strong>
+            </div>
+            <div class="sentiment-track"><div id="sentimentFill"></div></div>
+            <small id="sentimentNote">Tracking emotion movement, not just intent.</small>
+          </div>
+
+          <div class="translation-card" id="translationCard">
+            <span>Gemini Live Translate signal</span>
+            <p class="native">"No puedo seguir explicando esto."</p>
+            <p class="translated">I cannot keep explaining this.</p>
+            <strong>frustration spike + urgent family event</strong>
+          </div>
+
+          <div class="quality-grid">
+            <div><span>Containment</span><strong id="containmentMetric">52%</strong></div>
+            <div><span>NPS proxy</span><strong id="npsMetric">31</strong></div>
+            <div><span>Recontact risk</span><strong id="recontactMetric">42%</strong></div>
+            <div><span>Prediction</span><strong id="predictionMetric">61%</strong></div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="lower-grid">
+        <div class="panel">
+          <div class="panel-heading">
+            <div>
+              <div class="section-kicker">Prune / Promote</div>
+              <h3>Experiment outcome map</h3>
+            </div>
+            <span class="pill" id="mapStatus">1 branch selected</span>
+          </div>
+          <svg class="branch-map" viewBox="0 0 720 300" role="img" aria-label="Experiment branch map">
+            <defs>
+              <linearGradient id="branchGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#2f7d57" />
+                <stop offset="100%" stop-color="#3f7cac" />
+              </linearGradient>
+            </defs>
+            <path class="branch-line live" d="M80 205 C170 120, 250 112, 335 126 S500 80, 615 72" />
+            <path class="branch-line live" d="M335 126 C430 140, 500 160, 615 154" />
+            <path class="branch-line pruned" d="M80 205 C175 218, 245 245, 335 240 S505 238, 615 218" />
+            <path class="branch-line pruned" d="M335 240 C430 220, 500 245, 615 270" />
+            <g class="node-group active" transform="translate(80 205)"><circle r="24"></circle><text y="5">Start</text></g>
+            <g class="node-group promoted" transform="translate(335 126)"><circle r="24"></circle><text y="5">Tool</text></g>
+            <g class="node-group promoted" transform="translate(615 72)"><circle r="24"></circle><text y="5">Replace</text></g>
+            <g class="node-group preserved" transform="translate(615 154)"><circle r="24"></circle><text y="5">Offer</text></g>
+            <g class="node-group pruned-node" transform="translate(335 240)"><circle r="24"></circle><text y="5">Policy</text></g>
+            <g class="node-group pruned-node" transform="translate(615 218)"><circle r="24"></circle><text y="5">Cancel</text></g>
+            <g class="node-group pruned-node" transform="translate(615 270)"><circle r="24"></circle><text y="5">Refund</text></g>
+          </svg>
+          <div class="legend-row">
+            <span><i class="legend promoted-key"></i>promoted</span>
+            <span><i class="legend preserved-key"></i>preserved</span>
+            <span><i class="legend pruned-key"></i>pruned</span>
+          </div>
+        </div>
+
+        <div class="panel handoff-panel">
+          <div class="section-kicker">Person 2 Handoff</div>
+          <h3>Structured evidence sent to dream state</h3>
+          <pre id="handoffJson">{
+  "policy_arm": "policy_first_shipping_explanation_v1",
+  "failure_cluster": "late_delivery:urgent_event_deadline:policy_first",
+  "sentiment_delta": -0.57,
+  "pruning_decision": "soft_prune"
+}</pre>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
