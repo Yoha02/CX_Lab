@@ -4,6 +4,7 @@ import { WebSocketServer } from "ws";
 import { selectTts } from "./providers/tts/index.js";
 import { detectAndTranslate } from "./providers/translate.js";
 import { attachGeminiLive } from "./providers/voice/geminiLive.js";
+import { createLiveKitToken } from "./providers/voice/livekit.js";
 import { env } from "./lib/env.js";
 
 const app = express();
@@ -26,6 +27,15 @@ app.post("/api/translate", async (req, res) => {
     const { text } = req.body as { text: string };
     if (!text) return res.status(400).json({ error: "text required" });
     res.json(await detectAndTranslate(text));
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+app.get("/api/livekit/token", async (req, res) => {
+  try {
+    const room = String(req.query.room ?? "cx-demo");
+    const identity = String(req.query.identity ?? `agent-${Date.now()}`);
+    const token = await createLiveKitToken(room, identity);
+    res.json({ url: env.livekitUrl, token });
   } catch (e: any) { res.status(500).json({ error: e.message }); }
 });
 
