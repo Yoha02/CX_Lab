@@ -1,7 +1,7 @@
 import { startMicCapture, playAudioFromData, type MicHandle } from "./audio.js";
 import { openLiveSocket, type LiveSocket } from "./liveSocket.js";
 import { streamBranches } from "./branchSocket.js";
-import { useRunStore } from "../state/runStore.js";
+import { useRunStore, selectActiveIteration } from "../state/runStore.js";
 import { getDataSource } from "../data/index.js";
 
 export async function startDemo2Pipeline(): Promise<() => void> {
@@ -60,10 +60,11 @@ export async function startDemo2Pipeline(): Promise<() => void> {
               english: agentResponse,
               lang: "en-US",
             });
+            const provider = selectActiveIteration(useRunStore.getState())?.tts ?? "google";
             const tts = await fetch("/api/tts", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ text: agentResponse, provider: "google" }),
+              body: JSON.stringify({ text: agentResponse, provider }),
             });
             const audio = await tts.json();
             if (audio.audioBase64) await playAudioFromData(audio.mime, audio.audioBase64);
