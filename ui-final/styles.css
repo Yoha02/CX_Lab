@@ -1039,7 +1039,24 @@ dd {
 .transcript.live {
   min-height: 430px;
   max-height: 430px;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+
+.transcript.live::-webkit-scrollbar {
+  width: 8px;
+}
+
+.transcript.live::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.transcript.live::-webkit-scrollbar-thumb {
+  background: rgba(31, 42, 39, 0.18);
+  border-radius: 999px;
 }
 
 .turn {

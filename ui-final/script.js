@@ -1002,6 +1002,9 @@ function appendLiveTurn(turn) {
   sentimentValue.textContent = turn.sentiment[0];
   sentimentFill.style.width = turn.sentiment[1];
   [liveContainment.textContent, liveNps.textContent, liveRisk.textContent] = turn.metrics;
+  requestAnimationFrame(() => {
+    liveTranscript.scrollTop = liveTranscript.scrollHeight;
+  });
 }
 
 function seedLiveCall() {
