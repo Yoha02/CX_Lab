@@ -1,0 +1,289 @@
+{
+  "schema_version": "0.1",
+  "session_id": "sess_20260627_maya_01",
+  "run_id": "run_late_birthday_gift_gen1_seed03",
+  "created_at": "2026-06-27T17:18:00Z",
+  "session_type": "simulated_voice",
+  "metadata": {
+    "profile_id": "prof_maya_001",
+    "customer_name": "Maya",
+    "profile_segment": "vip_busy_parent",
+    "scenario": "late_birthday_gift",
+    "policy_version": "policy_late_delivery_gen1",
+    "policy_arm": "policy_first",
+    "merchant_id": "merchant_demo_outfitter",
+    "experiment_generation": 1,
+    "seed": 3
+  },
+  "profile_snapshot": {
+    "loyalty_tier": "gold",
+    "ltv_bucket": "high",
+    "family_size": 4,
+    "recent_orders_90d": 3,
+    "prior_tickets_90d": 2,
+    "risk_flags": [
+      "late_delivery_sensitive",
+      "repeat_issue",
+      "gift_deadline"
+    ],
+    "learned_preferences_before_call": [
+      "values delivery certainty over discounts",
+      "gets frustrated by policy-first language"
+    ]
+  },
+  "outcome": {
+    "contained": false,
+    "resolved": false,
+    "escalated": true,
+    "dropoff": false,
+    "resolution": "escalated_to_human",
+    "turns_to_resolution": null,
+    "turns_before_failure": 3,
+    "final_sentiment": -0.72,
+    "csat_prediction": 0.24,
+    "recontact_risk": 0.81
+  },
+  "turns": [
+    {
+      "turn_id": 1,
+      "speaker": "shopper",
+      "timestamp_ms": 0,
+      "channel": "voice_transcript",
+      "text": "My daughter's birthday is tomorrow and the tracking says the package hasn't even shipped yet.",
+      "asr_confidence": 0.94,
+      "actual_labels": {
+        "intent": "shipping_complaint",
+        "sentiment": "anxious",
+        "emotion_intensity": 0.76,
+        "escalation_risk": 0.38,
+        "objection": "deadline_pressure"
+      },
+      "prediction_before_turn": {
+        "source_turn_id": 0,
+        "method": "model_distribution_plus_profile_prior",
+        "top_intents": [
+          {
+            "intent": "shipping_complaint",
+            "probability": 0.62
+          },
+          {
+            "intent": "refund_status",
+            "probability": 0.18
+          },
+          {
+            "intent": "escalate_request",
+            "probability": 0.12
+          }
+        ],
+        "top_utterance_candidates": [
+          {
+            "text": "Where is my order? I need it by tomorrow.",
+            "probability": 0.41
+          },
+          {
+            "text": "The package is late and this is for a birthday.",
+            "probability": 0.27
+          }
+        ],
+        "confidence": 0.92,
+        "entropy": 0.91,
+        "logprob_available": false
+      },
+      "prediction_score": {
+        "intent_hit": true,
+        "intent_rank": 1,
+        "brier_score": 0.22,
+        "negative_log_likelihood": 0.48,
+        "semantic_similarity_best_candidate": 0.82,
+        "calibration_error": 0.08
+      },
+      "turn_eval": {
+        "customer_state_delta": -0.18,
+        "risk_delta": 0.08,
+        "key_event": "urgent_deadline_declared"
+      },
+      "pruning_signal": {
+        "eligible_for_learning": true,
+        "signal_type": "context_setup",
+        "keep_as_evidence": true,
+        "notes": "This turn establishes the profile-specific urgency condition."
+      }
+    },
+    {
+      "turn_id": 2,
+      "speaker": "agent",
+      "timestamp_ms": 6200,
+      "channel": "agent_response",
+      "text": "I understand your frustration. According to our policy, standard shipping takes 3-5 business days.",
+      "policy_action": {
+        "action_id": "policy_explanation_first",
+        "response_strategy": "policy_first",
+        "tools_called": [],
+        "memory_snippets_used": [
+          "Customer is deadline sensitive",
+          "Avoid policy-first language for repeat issues"
+        ],
+        "ignored_memory_warnings": [
+          "Avoid policy-first language for repeat issues"
+        ]
+      },
+      "response_eval": {
+        "empathy": 0.42,
+        "helpfulness": 0.18,
+        "policy_compliance": 0.95,
+        "factuality": 0.9,
+        "tone": 0.38,
+        "tool_use_quality": 0.05,
+        "missed_tool_opportunity": "replacement_inventory_lookup"
+      },
+      "pruning_signal": {
+        "eligible_for_learning": true,
+        "signal_type": "negative_policy_action",
+        "hard_prune": false,
+        "soft_prune_reason": "Policy-first response ignored urgent deadline and skipped available tool lookup.",
+        "preference_label": "rejected",
+        "counterfactual_to_try": "deadline_acknowledgement_then_inventory_lookup"
+      }
+    },
+    {
+      "turn_id": 3,
+      "speaker": "shopper",
+      "timestamp_ms": 12400,
+      "channel": "voice_transcript",
+      "text": "That doesn't help me! I need it tomorrow. Can I just cancel or get a refund?",
+      "asr_confidence": 0.91,
+      "actual_labels": {
+        "intent": "cancel_or_refund_threat",
+        "sentiment": "angry",
+        "emotion_intensity": 0.91,
+        "escalation_risk": 0.74,
+        "objection": "policy_does_not_solve_deadline"
+      },
+      "prediction_before_turn": {
+        "source_turn_id": 2,
+        "method": "model_distribution_plus_profile_prior",
+        "top_intents": [
+          {
+            "intent": "escalate_request",
+            "probability": 0.45
+          },
+          {
+            "intent": "ask_for_tracking",
+            "probability": 0.23
+          },
+          {
+            "intent": "cancel_or_refund_threat",
+            "probability": 0.16
+          }
+        ],
+        "top_utterance_candidates": [
+          {
+            "text": "Can I talk to a manager?",
+            "probability": 0.33
+          },
+          {
+            "text": "Where is the tracking number?",
+            "probability": 0.21
+          }
+        ],
+        "confidence": 0.45,
+        "entropy": 1.34,
+        "logprob_available": false
+      },
+      "prediction_score": {
+        "intent_hit": false,
+        "intent_rank": 3,
+        "brier_score": 0.91,
+        "negative_log_likelihood": 1.83,
+        "semantic_similarity_best_candidate": 0.49,
+        "calibration_error": 0.45
+      },
+      "turn_eval": {
+        "customer_state_delta": -0.34,
+        "risk_delta": 0.36,
+        "key_event": "containment_at_risk"
+      },
+      "pruning_signal": {
+        "eligible_for_learning": true,
+        "signal_type": "prediction_miss_plus_bad_outcome",
+        "keep_as_evidence": true,
+        "dream_pass_tags": [
+          "underpredicted_refund_threat",
+          "policy_first_aggravated_deadline"
+        ],
+        "notes": "The predictor expected manager escalation but missed cancellation/refund threat after policy-first response."
+      }
+    }
+  ],
+  "evaluation": {
+    "rubric_version": "retail_voice_v0.1",
+    "contained": false,
+    "resolution_score": 0.12,
+    "sentiment_recovery_score": 0.0,
+    "compliance_score": 0.95,
+    "empathy_score": 0.4,
+    "prediction_quality_score": 0.41,
+    "efficiency_score": 0.18,
+    "revenue_or_retention_score": 0.1,
+    "penalties": {
+      "hallucinated_policy": 0.0,
+      "unsafe_discount": 0.0,
+      "unsupported_delivery_promise": 0.0,
+      "avoidable_escalation": 0.25
+    },
+    "composite_reward": 0.243,
+    "failure_mode": "policy_first_aggravated_urgent_deadline",
+    "miss_reason": "Policy-first language aggravated an urgent emotional delivery timeline and skipped replacement inventory lookup."
+  },
+  "pruning_decision": {
+    "branch_status": "pruned",
+    "prune_type": "soft_prune",
+    "prune_at_turn_id": 3,
+    "should_remove_policy_arm": false,
+    "should_reduce_policy_arm_weight": true,
+    "policy_arm_weight_delta": -0.18,
+    "hard_prune_reasons": [],
+    "soft_prune_reasons": [
+      "composite_reward_below_threshold",
+      "negative_sentiment_trajectory",
+      "prediction_miss_correlated_with_escalation",
+      "missed_replacement_inventory_tool"
+    ],
+    "thresholds": {
+      "min_composite_reward": 0.55,
+      "max_escalation_risk": 0.65,
+      "min_empathy_score": 0.5
+    },
+    "preference_pair": {
+      "negative_response_turn_id": 2,
+      "recommended_positive_strategy": "deadline_acknowledgement_then_inventory_lookup",
+      "training_label": "prefer_counterfactual"
+    }
+  },
+  "dream_input": {
+    "eligible": true,
+    "priority": "high",
+    "tags": [
+      "vip_busy_parent",
+      "late_birthday_gift",
+      "policy_first_failure",
+      "refund_threat_underpredicted"
+    ],
+    "evidence_summary": "Policy-first response caused anger spike and refund/cancel threat. Predictor underweighted cancel_or_refund_threat after policy-first answer.",
+    "proposed_memory_patch": {
+      "target": "segments/vip_busy_parent/late_delivery.md",
+      "patch_type": "policy_guidance",
+      "candidate_text": "For VIP busy parents facing gift-deadline delivery issues, acknowledge the deadline first, then check replacement inventory or expedited delivery before explaining standard shipping policy."
+    },
+    "proposed_prediction_prior_update": {
+      "condition": "late_delivery + gift_deadline + policy_first_response",
+      "increase_intent_probability": {
+        "cancel_or_refund_threat": 0.18
+      },
+      "decrease_intent_probability": {
+        "ask_for_tracking": 0.08
+      }
+    }
+  },
+  "dream_pass_processed": false
+}
