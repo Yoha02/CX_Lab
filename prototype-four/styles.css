@@ -374,16 +374,31 @@ h3 {
 }
 
 .full-history-link span {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
+  display: inline-block;
   width: 21px;
   height: 21px;
   border-radius: 999px;
   background: var(--blue-soft);
-  line-height: 1;
-  font-weight: 900;
-  transform: translateY(-1px);
+  color: transparent;
+  line-height: 0;
+}
+
+.full-history-link span::before,
+.full-history-link span::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 9px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--blue);
+  transform: translate(-50%, -50%);
+}
+
+.full-history-link span::after {
+  transform: translate(-50%, -50%) rotate(90deg);
 }
 
 #personasView {
