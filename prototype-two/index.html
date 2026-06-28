@@ -144,37 +144,37 @@
             <span class="pill" id="branchStatus">Branches exploring</span>
           </div>
 
-          <svg class="branch-map" viewBox="0 0 720 300" role="img" aria-label="Branching experiment tree">
+          <svg class="branch-map" viewBox="0 0 720 340" role="img" aria-label="Branching experiment tree">
             <defs>
               <linearGradient id="branchGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stop-color="#2f7d57" />
                 <stop offset="100%" stop-color="#3f7cac" />
               </linearGradient>
             </defs>
-            <path class="branch-line live" d="M80 230 C160 160, 230 135, 330 150 S490 95, 630 105" />
-            <path class="branch-line live" d="M330 150 C430 150, 510 190, 630 185" />
-            <path class="branch-line pruned" d="M80 230 C190 240, 250 285, 330 260 S500 250, 630 255" />
-            <path class="branch-line pruned" d="M330 260 C430 230, 520 240, 630 230" />
+            <path class="branch-line live" d="M82 250 C155 170, 240 150, 332 160 S490 92, 594 84" />
+            <path class="branch-line live" d="M332 160 C430 164, 500 190, 594 186" />
+            <path class="branch-line pruned" d="M82 250 C185 260, 240 300, 332 286 S500 278, 594 258" />
+            <path class="branch-line pruned" d="M332 286 C430 252, 500 250, 594 304" />
 
-            <g class="node-group active" transform="translate(80 230)">
+            <g class="node-group active" transform="translate(82 250)">
               <circle r="24"></circle><text y="5">Start</text>
             </g>
-            <g class="node-group promoted" transform="translate(330 150)">
+            <g class="node-group promoted" transform="translate(332 160)">
               <circle r="24"></circle><text y="5">Tool</text>
             </g>
-            <g class="node-group promoted" transform="translate(630 105)">
+            <g class="node-group promoted" transform="translate(594 84)">
               <circle r="24"></circle><text y="5">Replace</text>
             </g>
-            <g class="node-group preserved" transform="translate(630 185)">
+            <g class="node-group preserved" transform="translate(594 186)">
               <circle r="24"></circle><text y="5">Offer</text>
             </g>
-            <g class="node-group pruned-node" transform="translate(330 260)">
+            <g class="node-group pruned-node" transform="translate(332 286)">
               <circle r="24"></circle><text y="5">Policy</text>
             </g>
-            <g class="node-group pruned-node" transform="translate(630 230)">
+            <g class="node-group pruned-node" transform="translate(594 258)">
               <circle r="24"></circle><text y="5">Delay</text>
             </g>
-            <g class="node-group pruned-node" transform="translate(630 255)">
+            <g class="node-group pruned-node" transform="translate(594 304)">
               <circle r="24"></circle><text y="5">Refund</text>
             </g>
           </svg>

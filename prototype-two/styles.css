@@ -216,6 +216,10 @@ dd {
   gap: 16px;
 }
 
+.panel-heading > div {
+  min-width: 0;
+}
+
 .top-bar {
   min-height: 74px;
   padding: 0 4px;
@@ -469,6 +473,8 @@ dd {
 .pill {
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
+  max-width: 100%;
   min-height: 30px;
   padding: 0 10px;
   border-radius: 999px;
@@ -476,12 +482,15 @@ dd {
   color: var(--muted);
   font-size: 12px;
   font-weight: 900;
+  white-space: nowrap;
 }
 
 .branch-map {
+  display: block;
   width: 100%;
-  min-height: 300px;
-  margin: 8px 0 0;
+  min-height: 340px;
+  margin: 18px 0 2px;
+  overflow: visible;
 }
 
 .branch-line {
