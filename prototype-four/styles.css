@@ -49,6 +49,7 @@ p {
   display: grid;
   grid-template-columns: 86px minmax(0, 1fr);
   min-height: 100vh;
+  transition: grid-template-columns 220ms ease;
 }
 
 .app-nav {
@@ -63,6 +64,59 @@ p {
   border-right: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.86);
   backdrop-filter: blur(14px);
+  transition: opacity 180ms ease, padding 180ms ease, transform 220ms ease, width 220ms ease;
+}
+
+.nav-collapsed .platform-shell {
+  grid-template-columns: 0 minmax(0, 1fr);
+}
+
+.nav-collapsed .app-nav {
+  width: 0;
+  padding-right: 0;
+  padding-left: 0;
+  overflow: hidden;
+  border-right: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-100%);
+}
+
+.nav-collapsed .topbar {
+  padding-left: 138px;
+}
+
+.floating-nav-toggle {
+  position: fixed;
+  top: 24px;
+  left: 18px;
+  z-index: 30;
+  display: none;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  font-weight: 850;
+}
+
+.nav-collapsed .floating-nav-toggle {
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav-collapse {
+  margin-top: auto;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-soft);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 900;
 }
 
 .mark {
@@ -1120,8 +1174,25 @@ dd {
     overflow-x: auto;
   }
 
+  .nav-collapsed .platform-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .nav-collapsed .app-nav {
+    display: none;
+  }
+
+  .nav-collapsed .topbar {
+    padding-left: 108px;
+  }
+
   .mark {
     display: none;
+  }
+
+  .nav-collapse {
+    min-width: 72px;
+    margin-top: 0;
   }
 
   .topbar,

@@ -3,6 +3,8 @@ const navItems = [...document.querySelectorAll(".nav-item")];
 const pageTitle = document.querySelector("#pageTitle");
 const primaryAction = document.querySelector("#primaryAction");
 const resetDemo = document.querySelector("#resetDemo");
+const navToggle = document.querySelector("#navToggle");
+const navCollapse = document.querySelector("#navCollapse");
 const canvas = document.querySelector("#experimentCanvas");
 const inspectorStatus = document.querySelector("#inspectorStatus");
 const inspectorBody = document.querySelector("#inspectorBody");
@@ -104,6 +106,12 @@ let liveIndex = 0;
 let liveTimer = null;
 let dreamIndex = 0;
 let dreamTimer = null;
+
+function setNavCollapsed(collapsed) {
+  document.body.classList.toggle("nav-collapsed", collapsed);
+  navToggle.setAttribute("aria-expanded", String(!collapsed));
+  navCollapse.setAttribute("aria-expanded", String(!collapsed));
+}
 
 function switchView(view) {
   activeView = view;
@@ -257,6 +265,7 @@ function appendLiveTurn(turn) {
 }
 
 function seedLiveCall() {
+  setNavCollapsed(true);
   clearInterval(liveTimer);
   liveTranscript.innerHTML = "";
   liveIndex = 0;
@@ -273,6 +282,7 @@ function seedLiveCall() {
 }
 
 function runDreamPass() {
+  setNavCollapsed(true);
   const columns = [...document.querySelectorAll(".dream-column")];
   clearInterval(dreamTimer);
   dreamIndex = 0;
@@ -289,8 +299,16 @@ function runDreamPass() {
   }, 850);
 }
 
+navToggle.addEventListener("click", () => setNavCollapsed(false));
+navCollapse.addEventListener("click", () => setNavCollapsed(true));
+
 navItems.forEach((item) => item.addEventListener("click", () => switchView(item.dataset.view)));
-document.querySelectorAll("[data-view-target]").forEach((item) => item.addEventListener("click", () => switchView(item.dataset.viewTarget)));
+document.querySelectorAll("[data-view-target]").forEach((item) => item.addEventListener("click", () => {
+  switchView(item.dataset.viewTarget);
+  if (item.dataset.viewTarget === "personas" || item.dataset.viewTarget === "analytics") {
+    setNavCollapsed(false);
+  }
+}));
 
 primaryAction.addEventListener("click", () => {
   if (activeView === "personas") {
@@ -301,6 +319,7 @@ primaryAction.addEventListener("click", () => {
   } else if (activeView === "live") {
     seedLiveCall();
   } else if (activeView === "pruning") {
+    setNavCollapsed(false);
     switchView("personas");
   } else if (activeView === "dream") {
     runDreamPass();
@@ -317,6 +336,7 @@ resetDemo.addEventListener("click", () => {
   liveProfile.classList.remove("identified");
   liveProfile.innerHTML = `<div class="empty-profile"><span>Awaiting caller identification</span><p>LiveKit audio is simulated here. Persona will populate after greeting.</p></div>`;
   renderPredictions([["late delivery", 44], ["refund request", 24], ["tracking ask", 20], ["other", 12]]);
+  setNavCollapsed(false);
   switchView("personas");
   renderCanvas();
 });
@@ -344,7 +364,10 @@ createExperiment.addEventListener("click", () => {
 });
 
 seedCall.addEventListener("click", seedLiveCall);
-processCall.addEventListener("click", () => switchView("pruning"));
+processCall.addEventListener("click", () => {
+  setNavCollapsed(true);
+  switchView("pruning");
+});
 runDream.addEventListener("click", runDreamPass);
 
 renderCanvas();
