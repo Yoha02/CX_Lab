@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>CX Lab — Translation Demo</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, sans-serif; max-width: 860px; margin: 0 auto; padding: 24px 16px; background: #f0f2f5; }
+  h1 { font-size: 1.6rem; margin-bottom: 4px; }
+  .subtitle { color: #666; margin-bottom: 24px; font-size: 14px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+  .tab { padding: 8px 18px; border-radius: 20px; border: 2px solid #ccc; background: #fff; cursor: pointer; font-size: 14px; font-weight: 600; }
+  .tab.active { background: #1a73e8; color: #fff; border-color: #1a73e8; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .card h2 { margin: 0 0 14px; font-size: 1rem; color: #333; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  @media (max-width: 560px) { .row { grid-template-columns: 1fr; } }
+  .field label { display: block; font-size: 12px; font-weight: 700; color: #888; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; }
+  .box { padding: 12px 14px; background: #f8f9fa; border-radius: 8px; min-height: 3em; white-space: pre-wrap; line-height: 1.6; font-size: 15px; border: 1px solid #e8eaed; }
+  button.btn { padding: 10px 22px; font-size: 15px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; }
+  button.primary { background: #1a73e8; color: #fff; }
+  button.primary:hover { background: #1558b0; }
+  button.danger { background: #d93025; color: #fff; }
+  button.secondary { background: #e8eaed; color: #333; }
+  .controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  select { padding: 8px 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; background: #fff; }
+  .status { font-size: 13px; color: #888; }
+  .status.ok { color: #188038; }
+  .status.err { color: #d93025; }
+  audio { width: 100%; margin-top: 8px; }
+  .spinner { display: none; width: 18px; height: 18px; border: 3px solid #ccc; border-top-color: #1a73e8; border-radius: 50%; animation: spin .7s linear infinite; }
+  .spinner.visible { display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  textarea { width: 100%; padding: 12px 14px; border: 1px solid #e8eaed; border-radius: 8px; font-size: 15px; line-height: 1.6; resize: vertical; font-family: inherit; min-height: 80px; background: #fff; }
+  .mic-btn { font-size: 22px; width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 0; }
+  .mic-btn.recording { background: #d93025; animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(217,48,37,.5); } 50% { box-shadow: 0 0 0 10px rgba(217,48,37,0); } }
+</style>
+</head>
+<body>
+<h1>CX Lab — Translation Demo</h1>
+<p class="subtitle">Powered by Gemini API &nbsp;·&nbsp; STT · Translate · TTS</p>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('forward')">🌍 Speak → Translate</button>
+  <button class="tab" onclick="switchTab('reverse')">🔁 English → Any Language</button>
+  <button class="tab" onclick="switchTab('live')">⚡ Live Mode</button>
+</div>
+
+<!-- PANEL 1: Record → translate to English -->
+<div id="panel-forward" class="panel active">
+  <div class="card">
+    <h2>Record your voice in any language</h2>
+    <div class="controls">
+      <button id="rec-btn" class="btn primary mic-btn" onclick="toggleRecord()">🎙️</button>
+      <span id="rec-status" class="status">Press to record</span>
+      <div id="rec-spinner" class="spinner"></div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Detected Language</label>
+        <div id="fwd-lang" class="box" style="min-height:2.4em">—</div>
+      </div>
+      <div class="field">
+        <label>You Said (original)</label>
+        <div id="fwd-original" class="box">—</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>English Translation</label>
+      <div id="fwd-english" class="box">—</div>
+    </div>
+    <audio id="fwd-audio" controls style="margin-top:10px;width:100%;display:none"></audio>
+    <div style="margin-top:10px">
+      <button class="btn secondary" onclick="playTranslation()">🔊 Speak English</button>
+    </div>
+    <div style="margin-top:18px;padding-top:14px;border-top:1px solid #e8eaed;font-size:12px;color:#888;line-height:1.8">
+      <b style="color:#555">Tech stack</b><br>
+      🖥️ <b>App server:</b> Node.js + Express running on <code>localhost:3000</code><br>
+      ☁️ <b>AI hosted by:</b> Google Cloud — all model calls go to <code>generativelanguage.googleapis.com</code><br>
+      🤖 <b>STT + Translate model:</b> <code>gemini-2.5-flash</code> — audio in, JSON transcript + translation out<br>
+      🔊 <b>TTS model:</b> <code>gemini-2.5-flash-preview-tts</code> — text in, spoken WAV out<br>
+      🌍 <b>Solves:</b> Understanding what a non-English speaker said — detects language, transcribes, and translates to English
+    </div>
+  </div>
+</div>
+
+<!-- PANEL 2: English → target language -->
+<div id="panel-reverse" class="panel">
+  <div class="card">
+    <h2>English text → translate + speak in another language</h2>
+    <div class="controls">
+      <label style="font-weight:600;font-size:14px">Target language:</label>
+      <select id="target-lang">
+        <option value="Spanish">Spanish</option>
+        <option value="French">French</option>
+        <option value="German">German</option>
+        <option value="Japanese">Japanese</option>
+        <option value="Chinese (Mandarin)">Chinese (Mandarin)</option>
+        <option value="Arabic">Arabic</option>
+        <option value="Hindi">Hindi</option>
+        <option value="Portuguese">Portuguese</option>
+        <option value="Italian">Italian</option>
+        <option value="Korean">Korean</option>
+        <option value="Russian">Russian</option>
+        <option value="Dutch">Dutch</option>
+      </select>
+      <div id="rev-spinner" class="spinner"></div>
+    </div>
+    <div class="field" style="margin-bottom:12px">
+      <label>English Input</label>
+      <textarea id="rev-input" placeholder="Type or paste English text here…">Hello! How are you today? I hope you are doing well.</textarea>
+    </div>
+    <button class="btn primary" onclick="doReverse()">Translate &amp; Speak →</button>
+    <div style="margin-top:16px">
+      <div class="field" style="margin-bottom:8px">
+        <label>Translation</label>
+        <div id="rev-translated" class="box">—</div>
+      </div>
+      <audio id="rev-audio" controls style="width:100%;margin-top:8px;display:none"></audio>
+    </div>
+    <p id="rev-status" class="status" style="margin-top:8px"></p>
+    <div style="margin-top:18px;padding-top:14px;border-top:1px solid #e8eaed;font-size:12px;color:#888;line-height:1.8">
+      <b style="color:#555">Tech stack</b><br>
+      🖥️ <b>App server:</b> Node.js + Express running on <code>localhost:3000</code><br>
+      ☁️ <b>AI hosted by:</b> Google Cloud — all model calls go to <code>generativelanguage.googleapis.com</code><br>
+      🤖 <b>Translate model:</b> <code>gemini-2.5-flash</code> — English text in, foreign-language text out<br>
+      🔊 <b>TTS model:</b> <code>gemini-2.5-flash-preview-tts</code> — foreign-language text in, spoken WAV out<br>
+      🌍 <b>Solves:</b> Composing messages or speaking to a non-English audience — write once in English, deliver in any of 70+ languages
+    </div>
+  </div>
+</div>
+
+<!-- PANEL 3: Live streaming -->
+<div id="panel-live" class="panel">
+  <div class="card">
+    <h2>Live — Speak and get instant English translation</h2>
+    <p style="color:#555;font-size:14px;margin-top:-8px">Click Start, allow mic, then just speak.</p>
+    <div class="controls">
+      <button id="live-btn" class="btn primary" onclick="toggleLive()">🎙️ Start Live</button>
+      <span id="live-status" class="status">idle</span>
+      <div id="live-spinner" class="spinner"></div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>You Said</label>
+        <div id="live-in" class="box">—</div>
+      </div>
+      <div class="field">
+        <label>English Translation (spoken back)</label>
+        <div id="live-out" class="box">—</div>
+      </div>
+    </div>
+    <audio id="live-audio" autoplay style="display:none"></audio>
+    <div style="margin-top:18px;padding-top:14px;border-top:1px solid #e8eaed;font-size:12px;color:#888;line-height:1.8">
+      <b style="color:#555">Tech stack</b><br>
+      🖥️ <b>Hosting:</b> Node.js + ws WebSocket proxy on localhost (target: DigitalOcean Droplet)<br>
+      🤖 <b>Model:</b> <code>gemini-3.5-live-translate-preview</code> — continuous bidirectional audio stream, speech-to-speech translation<br>
+      ⚡ <b>Protocol:</b> Gemini Live API over WebSocket — PCM audio chunks streamed in real time, translated audio streamed back<br>
+      🌍 <b>Solves:</b> Real-time conversation across languages — no pauses, no turn-taking, translates continuously just seconds behind the speaker
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['forward','reverse','live'][i] === name));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+// ---- Tab 1: Record → Translate ----
+let mediaRecorder, audioChunks = [], isRecording = false, lastEnglish = '';
+
+async function toggleRecord() {
+  if (isRecording) return stopRecord();
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioChunks = [];
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = () => { stream.getTracks().forEach(t => t.stop()); processRecording(); };
+    mediaRecorder.start();
+    isRecording = true;
+    document.getElementById('rec-btn').classList.add('recording');
+    document.getElementById('rec-btn').textContent = '⏹';
+    document.getElementById('rec-status').textContent = 'Recording… click to stop';
+    document.getElementById('rec-status').className = 'status err';
+  } catch(e) {
+    document.getElementById('rec-status').textContent = 'Mic error: ' + e.message;
+    document.getElementById('rec-status').className = 'status err';
+  }
+}
+
+function stopRecord() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  isRecording = false;
+  document.getElementById('rec-btn').classList.remove('recording');
+  document.getElementById('rec-btn').textContent = '🎙️';
+  document.getElementById('rec-status').textContent = 'Processing…';
+  document.getElementById('rec-spinner').classList.add('visible');
+}
+
+async function processRecording() {
+  const blob = new Blob(audioChunks, { type: 'audio/webm' });
+  const form = new FormData();
+  form.append('audio', blob, 'audio.webm');
+  try {
+    const r = await fetch('/api/process-full', { method: 'POST', body: form });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    document.getElementById('fwd-lang').textContent = d.lang || '—';
+    document.getElementById('fwd-original').textContent = d.original || '—';
+    document.getElementById('fwd-english').textContent = d.english || '—';
+    lastEnglish = d.english || '';
+    if (d.audio) {
+      const el = document.getElementById('fwd-audio');
+      el.src = 'data:' + d.audio.mime + ';base64,' + d.audio.base64;
+      el.style.display = 'block';
+      el.play().catch(()=>{});
+    }
+    document.getElementById('rec-status').textContent = 'Done! Record again any time.';
+    document.getElementById('rec-status').className = 'status ok';
+  } catch(e) {
+    document.getElementById('rec-status').textContent = 'Error: ' + e.message;
+    document.getElementById('rec-status').className = 'status err';
+  }
+  document.getElementById('rec-spinner').classList.remove('visible');
+}
+
+async function playTranslation() {
+  const text = lastEnglish || document.getElementById('fwd-english').textContent;
+  if (!text || text === '—') return;
+  const r = await fetch('/api/tts', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text}) });
+  const d = await r.json();
+  if (d.audioBase64) {
+    const el = document.getElementById('fwd-audio');
+    el.src = 'data:' + d.mime + ';base64,' + d.audioBase64;
+    el.style.display = 'block';
+    el.play().catch(()=>{});
+  }
+}
+
+// ---- Tab 2: English → Any Language ----
+async function doReverse() {
+  const text = document.getElementById('rev-input').value.trim();
+  const targetLang = document.getElementById('target-lang').value;
+  if (!text) return;
+  document.getElementById('rev-spinner').classList.add('visible');
+  document.getElementById('rev-status').textContent = 'Translating…';
+  document.getElementById('rev-translated').textContent = '—';
+  document.getElementById('rev-audio').style.display = 'none';
+  try {
+    const r = await fetch('/api/reverse', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text, targetLang}) });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    document.getElementById('rev-translated').textContent = d.translated || '—';
+    if (d.audio) {
+      const el = document.getElementById('rev-audio');
+      el.src = 'data:' + d.audio.mime + ';base64,' + d.audio.base64;
+      el.style.display = 'block';
+      el.play().catch(()=>{});
+    }
+    document.getElementById('rev-status').textContent = 'Done!';
+    document.getElementById('rev-status').className = 'status ok';
+  } catch(e) {
+    document.getElementById('rev-status').textContent = 'Error: ' + e.message;
+    document.getElementById('rev-status').className = 'status err';
+  }
+  document.getElementById('rev-spinner').classList.remove('visible');
+}
+
+// ---- Tab 3: Live ----
+let ws = null, micStream = null, audioCtxIn = null, audioCtxOut = null, processor = null;
+let liveActive = false, nextPlayTime = 0;
+const INPUT_RATE = 16000, OUTPUT_RATE = 24000;
+
+function b64FromInt16(i16) {
+  const b = new Uint8Array(i16.buffer); let s='';
+  for(let i=0;i<b.length;i++) s+=String.fromCharCode(b[i]);
+  return btoa(s);
+}
+function i16FromB64(b64) {
+  const s=atob(b64); const b=new Uint8Array(s.length);
+  for(let i=0;i<s.length;i++) b[i]=s.charCodeAt(i);
+  return new Int16Array(b.buffer);
+}
+
+async function toggleLive() {
+  if (liveActive) { stopLive(); return; }
+  document.getElementById('live-status').textContent = 'connecting…';
+  document.getElementById('live-spinner').classList.add('visible');
+
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount:1, echoCancellation:true, noiseSuppression:true } });
+  } catch(e) {
+    document.getElementById('live-status').textContent = 'Mic error: ' + e.message;
+    document.getElementById('live-status').className = 'status err';
+    document.getElementById('live-spinner').classList.remove('visible');
+    return;
+  }
+
+  ws = new WebSocket(`ws://${location.host}/api/live`);
+  ws.binaryType = 'arraybuffer';
+
+  ws.onopen = () => {
+    ws.send(JSON.stringify({
+      setup: {
+        model: 'models/gemini-3.5-live-translate-preview',
+        generation_config: {
+          response_modalities: ['AUDIO'],
+          speech_config: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } },
+        },
+        system_instruction: { parts: [{ text: 'You are a real-time interpreter. Translate what the user says into natural spoken English. Be concise. No commentary.' }] },
+        input_audio_transcription: {},
+        output_audio_transcription: {},
+      },
+    }));
+  };
+
+  ws.onmessage = async (ev) => {
+    const raw = ev.data instanceof ArrayBuffer ? new TextDecoder().decode(ev.data) : ev.data;
+    let msg; try { msg = JSON.parse(raw); } catch { return; }
+    if (msg.setupComplete) {
+      startMicStream();
+      liveActive = true;
+      document.getElementById('live-btn').textContent = '⏹ Stop';
+      document.getElementById('live-btn').className = 'btn danger';
+      document.getElementById('live-status').textContent = '🎤 Live — speak now';
+      document.getElementById('live-status').className = 'status ok';
+      document.getElementById('live-spinner').classList.remove('visible');
+    }
+    if (msg.serverContent) handleLiveContent(msg.serverContent);
+    if (msg.error) {
+      document.getElementById('live-status').textContent = 'Error: ' + JSON.stringify(msg.error).slice(0,120);
+      document.getElementById('live-status').className = 'status err';
+    }
+  };
+
+  ws.onclose = (ev) => {
+    if (liveActive) document.getElementById('live-status').textContent = `disconnected (${ev.code})`;
+    stopLive(false);
+  };
+  ws.onerror = () => {
+    document.getElementById('live-status').textContent = 'WebSocket error';
+    document.getElementById('live-status').className = 'status err';
+  };
+}
+
+function handleLiveContent(sc) {
+  if (sc.inputTranscription?.text) {
+    const el = document.getElementById('live-in');
+    if (el.textContent === '—') el.textContent = '';
+    el.textContent += sc.inputTranscription.text;
+  }
+  if (sc.outputTranscription?.text) {
+    const el = document.getElementById('live-out');
+    if (el.textContent === '—') el.textContent = '';
+    el.textContent += sc.outputTranscription.text;
+  }
+  if (sc.modelTurn?.parts) {
+    for (const p of sc.modelTurn.parts) {
+      if (p.inlineData?.mimeType?.startsWith('audio/')) playChunk(p.inlineData.data);
+    }
+  }
+}
+
+function playChunk(b64) {
+  if (!audioCtxOut) { audioCtxOut = new AudioContext(); audioCtxOut.resume(); }
+  const pcm = i16FromB64(b64);
+  const f32 = new Float32Array(pcm.length);
+  for(let i=0;i<pcm.length;i++) f32[i]=pcm[i]/32768;
+  const buf = audioCtxOut.createBuffer(1, f32.length, OUTPUT_RATE);
+  buf.copyToChannel(f32, 0);
+  const src = audioCtxOut.createBufferSource();
+  const gain = audioCtxOut.createGain(); gain.gain.value = 1.5;
+  src.buffer = buf; src.connect(gain).connect(audioCtxOut.destination);
+  const t = Math.max(audioCtxOut.currentTime, nextPlayTime);
+  src.start(t); nextPlayTime = t + buf.duration;
+}
+
+function startMicStream() {
+  audioCtxIn = new AudioContext();
+  audioCtxIn.resume();
+  const rate = audioCtxIn.sampleRate;
+  const src = audioCtxIn.createMediaStreamSource(micStream);
+  processor = audioCtxIn.createScriptProcessor(4096, 1, 1);
+  const sink = audioCtxIn.createGain(); sink.gain.value = 0;
+  src.connect(processor); processor.connect(sink); sink.connect(audioCtxIn.destination);
+  const ratio = rate / INPUT_RATE;
+  processor.onaudioprocess = (e) => {
+    if (!liveActive || ws?.readyState !== WebSocket.OPEN) return;
+    const inp = e.inputBuffer.getChannelData(0);
+    const out = new Int16Array(Math.floor(inp.length / ratio));
+    for(let i=0;i<out.length;i++) {
+      let sum=0, s=Math.floor(i*ratio), en=Math.min(inp.length,Math.floor((i+1)*ratio));
+      for(let j=s;j<en;j++) sum+=inp[j];
+      const v=Math.max(-1,Math.min(1,sum/(en-s)));
+      out[i]=v<0?v*0x8000:v*0x7fff;
+    }
+    ws.send(JSON.stringify({ realtime_input: { media_chunks: [{ mime_type:'audio/pcm', data:b64FromInt16(out) }] } }));
+  };
+}
+
+function stopLive(closeWs=true) {
+  liveActive = false;
+  if (processor) { processor.disconnect(); processor=null; }
+  if (audioCtxIn) { audioCtxIn.close().catch(()=>{}); audioCtxIn=null; }
+  if (micStream) { micStream.getTracks().forEach(t=>t.stop()); micStream=null; }
+  if (closeWs && ws) ws.close();
+  ws = null;
+  if (audioCtxOut) { audioCtxOut.close().catch(()=>{}); audioCtxOut=null; }
+  nextPlayTime = 0;
+  document.getElementById('live-btn').textContent = '🎙️ Start Live';
+  document.getElementById('live-btn').className = 'btn primary';
+  document.getElementById('live-status').textContent = 'idle';
+  document.getElementById('live-status').className = 'status';
+  document.getElementById('live-spinner').classList.remove('visible');
+}
+
+window.addEventListener('beforeunload', () => stopLive());
+</script>
+</body>
+</html>

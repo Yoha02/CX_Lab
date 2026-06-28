@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink:#1f2933; --muted:#6b7785; --surface:#f0f2f5; --panel:#fff;
+  --accent:#3f7cac; --promoted:#2f7d57; --preserved:#3f7cac; --pruned:#c0533f;
+}
+html, body, #root { height: 100%; }
+body { margin: 0; background: var(--surface); color: var(--ink); font-family: system-ui, sans-serif; }
+.app-shell { display: grid; grid-template-rows: auto 1fr; height: 100vh; }
