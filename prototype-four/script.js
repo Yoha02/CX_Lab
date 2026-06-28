@@ -3,8 +3,9 @@ const navItems = [...document.querySelectorAll(".nav-item")];
 const pageTitle = document.querySelector("#pageTitle");
 const primaryAction = document.querySelector("#primaryAction");
 const resetDemo = document.querySelector("#resetDemo");
-const navToggle = document.querySelector("#navToggle");
 const navCollapse = document.querySelector("#navCollapse");
+const collapseArrows = navCollapse.querySelector(".collapse-arrows");
+const collapseLabel = navCollapse.querySelector("strong");
 const canvas = document.querySelector("#experimentCanvas");
 const inspectorStatus = document.querySelector("#inspectorStatus");
 const inspectorBody = document.querySelector("#inspectorBody");
@@ -24,6 +25,7 @@ const liveRisk = document.querySelector("#liveRisk");
 const runDream = document.querySelector("#runDream");
 
 const titles = {
+  home: "Home",
   personas: "Persona experiment canvas",
   history: "Interaction history",
   live: "Live call workspace",
@@ -33,6 +35,7 @@ const titles = {
 };
 
 const primaryLabels = {
+  home: "Open canvas",
   personas: "Generate 128 arms",
   history: "Start similar call",
   live: "Seed mock call",
@@ -101,7 +104,7 @@ const liveScript = [
 ];
 
 let expanded = false;
-let activeView = "personas";
+let activeView = "home";
 let liveIndex = 0;
 let liveTimer = null;
 let dreamIndex = 0;
@@ -109,12 +112,14 @@ let dreamTimer = null;
 
 function setNavCollapsed(collapsed) {
   document.body.classList.toggle("nav-collapsed", collapsed);
-  navToggle.setAttribute("aria-expanded", String(!collapsed));
   navCollapse.setAttribute("aria-expanded", String(!collapsed));
+  collapseArrows.textContent = collapsed ? ">>" : "<<";
+  collapseLabel.textContent = collapsed ? "Show nav" : "Hide nav";
 }
 
 function switchView(view) {
   activeView = view;
+  document.body.dataset.view = view;
   views.forEach((item) => item.classList.toggle("active", item.dataset.view === view));
   navItems.forEach((item) => item.classList.toggle("active", item.dataset.view === view));
   pageTitle.textContent = titles[view];
@@ -299,8 +304,7 @@ function runDreamPass() {
   }, 850);
 }
 
-navToggle.addEventListener("click", () => setNavCollapsed(false));
-navCollapse.addEventListener("click", () => setNavCollapsed(true));
+navCollapse.addEventListener("click", () => setNavCollapsed(!document.body.classList.contains("nav-collapsed")));
 
 navItems.forEach((item) => item.addEventListener("click", () => switchView(item.dataset.view)));
 document.querySelectorAll("[data-view-target]").forEach((item) => item.addEventListener("click", () => {
@@ -311,7 +315,9 @@ document.querySelectorAll("[data-view-target]").forEach((item) => item.addEventL
 }));
 
 primaryAction.addEventListener("click", () => {
-  if (activeView === "personas") {
+  if (activeView === "home") {
+    switchView("personas");
+  } else if (activeView === "personas") {
     expanded = true;
     renderCanvas();
   } else if (activeView === "history") {
@@ -337,7 +343,7 @@ resetDemo.addEventListener("click", () => {
   liveProfile.innerHTML = `<div class="empty-profile"><span>Awaiting caller identification</span><p>LiveKit audio is simulated here. Persona will populate after greeting.</p></div>`;
   renderPredictions([["late delivery", 44], ["refund request", 24], ["tracking ask", 20], ["other", 12]]);
   setNavCollapsed(false);
-  switchView("personas");
+  switchView("home");
   renderCanvas();
 });
 
@@ -370,5 +376,6 @@ processCall.addEventListener("click", () => {
 });
 runDream.addEventListener("click", runDreamPass);
 
+switchView("home");
 renderCanvas();
 renderPredictions([["late delivery", 44], ["refund request", 24], ["tracking ask", 20], ["other", 12]]);

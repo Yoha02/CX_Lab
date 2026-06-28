@@ -47,7 +47,7 @@ p {
 
 .platform-shell {
   display: grid;
-  grid-template-columns: 86px minmax(0, 1fr);
+  grid-template-columns: 258px minmax(0, 1fr);
   min-height: 100vh;
   transition: grid-template-columns 220ms ease;
 }
@@ -64,52 +64,24 @@ p {
   border-right: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.86);
   backdrop-filter: blur(14px);
-  transition: opacity 180ms ease, padding 180ms ease, transform 220ms ease, width 220ms ease;
+  transition: padding 180ms ease, width 220ms ease;
 }
 
 .nav-collapsed .platform-shell {
-  grid-template-columns: 0 minmax(0, 1fr);
+  grid-template-columns: 86px minmax(0, 1fr);
 }
 
 .nav-collapsed .app-nav {
-  width: 0;
-  padding-right: 0;
-  padding-left: 0;
-  overflow: hidden;
-  border-right: 0;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateX(-100%);
-}
-
-.nav-collapsed .topbar {
-  padding-left: 138px;
-}
-
-.floating-nav-toggle {
-  position: fixed;
-  top: 24px;
-  left: 18px;
-  z-index: 30;
-  display: none;
-  min-height: 38px;
-  padding: 0 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: var(--shadow);
-  cursor: pointer;
-  font-weight: 850;
-}
-
-.nav-collapsed .floating-nav-toggle {
-  display: inline-flex;
-  align-items: center;
+  padding-right: 12px;
+  padding-left: 12px;
 }
 
 .nav-collapse {
+  display: grid;
+  place-items: center;
+  gap: 4px;
   margin-top: auto;
-  min-height: 42px;
+  min-height: 58px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel-soft);
@@ -119,10 +91,16 @@ p {
   font-weight: 900;
 }
 
+.collapse-arrows {
+  color: var(--blue);
+  font-size: 15px;
+  letter-spacing: 1px;
+}
+
 .mark {
   display: grid;
   place-items: center;
-  width: 54px;
+  width: 100%;
   height: 54px;
   margin: 0 auto 12px;
   border-radius: 8px;
@@ -132,20 +110,24 @@ p {
 }
 
 .nav-item {
-  display: grid;
-  place-items: center;
-  gap: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
   min-height: 64px;
+  padding: 0 14px;
   border-radius: 8px;
   background: transparent;
   cursor: pointer;
+  text-align: left;
 }
 
 .nav-item span {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
   border-radius: 8px;
   background: var(--panel-soft);
   color: var(--muted);
@@ -155,7 +137,7 @@ p {
 
 .nav-item strong {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 14px;
 }
 
 .nav-item.active {
@@ -171,6 +153,31 @@ p {
   color: var(--ink);
 }
 
+.nav-collapsed .mark {
+  width: 54px;
+}
+
+.nav-collapsed .nav-item {
+  display: grid;
+  place-items: center;
+  gap: 5px;
+  padding: 0;
+  text-align: center;
+}
+
+.nav-collapsed .nav-item span {
+  width: 30px;
+  height: 30px;
+}
+
+.nav-collapsed .nav-item strong {
+  font-size: 10px;
+}
+
+.nav-collapsed .nav-collapse strong {
+  font-size: 10px;
+}
+
 .workspace {
   min-width: 0;
   padding: 18px;
@@ -183,6 +190,10 @@ p {
   gap: 18px;
   min-height: 76px;
   padding: 0 6px 16px;
+}
+
+body[data-view="home"] .topbar {
+  display: none;
 }
 
 .eyebrow {
@@ -251,6 +262,80 @@ h3 {
 .content-view.active {
   display: grid;
   animation: rise 260ms ease both;
+}
+
+#homeView {
+  min-height: calc(100vh - 36px);
+  place-items: center;
+}
+
+.home-canvas {
+  display: grid;
+  gap: 22px;
+  width: min(820px, 100%);
+}
+
+.welcome-panel {
+  padding: 10px 4px 18px;
+}
+
+.welcome-panel h2 {
+  max-width: 740px;
+  font-size: clamp(36px, 5vw, 60px);
+  line-height: 1.02;
+}
+
+.welcome-panel p {
+  max-width: 680px;
+  margin-top: 20px;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.recent-panel {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: var(--shadow);
+}
+
+.recent-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.recent-row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  min-height: 76px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-soft);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 180ms ease, transform 180ms ease;
+}
+
+.recent-row:hover {
+  border-color: rgba(63, 124, 172, 0.48);
+  transform: translateY(-1px);
+}
+
+.recent-row small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+}
+
+.recent-row b {
+  color: var(--blue);
+  font-size: 13px;
 }
 
 #personasView {

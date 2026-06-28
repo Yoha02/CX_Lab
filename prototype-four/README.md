@@ -7,7 +7,8 @@ Open `index.html` directly in a browser. No build step is required.
 ## What This Prototype Shows
 
 - Left navigation for personas, history, live calls, pruning, dream pass, and analytics.
-- Collapsible navigation rail that auto-hides during focused workflows.
+- Clean landing canvas with recent persona experiment rows.
+- Expanded navigation rail that collapses into the compact workflow rail.
 - Persona experiment canvas with expandable strategy families and child experiment nodes.
 - Maya history drilldown with transcript, policy node, containment scores, and prune/promote map.
 - Simulated live call that identifies Maya, updates profile context, tracks next-intent prediction, sentiment, NPS proxy, and recontact risk.

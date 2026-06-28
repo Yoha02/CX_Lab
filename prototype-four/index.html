@@ -8,16 +8,19 @@
 </head>
 <body>
   <div class="platform-shell">
-    <button class="floating-nav-toggle" id="navToggle" type="button" aria-expanded="false">Show nav</button>
     <aside class="app-nav" aria-label="Primary navigation">
       <div class="mark">CX</div>
-      <button class="nav-item active" data-view="personas" type="button"><span>PE</span><strong>Personas</strong></button>
+      <button class="nav-item active" data-view="home" type="button"><span>HM</span><strong>Home</strong></button>
+      <button class="nav-item" data-view="personas" type="button"><span>PE</span><strong>Personas</strong></button>
       <button class="nav-item" data-view="history" type="button"><span>HI</span><strong>History</strong></button>
       <button class="nav-item" data-view="live" type="button"><span>LC</span><strong>Live call</strong></button>
       <button class="nav-item" data-view="pruning" type="button"><span>PR</span><strong>Pruning</strong></button>
       <button class="nav-item" data-view="dream" type="button"><span>DR</span><strong>Dream pass</strong></button>
       <button class="nav-item" data-view="analytics" type="button"><span>AN</span><strong>Analytics</strong></button>
-      <button class="nav-collapse" id="navCollapse" type="button" aria-expanded="true">Hide nav</button>
+      <button class="nav-collapse" id="navCollapse" type="button" aria-expanded="true">
+        <span class="collapse-arrows">&lt;&lt;</span>
+        <strong>Hide nav</strong>
+      </button>
     </aside>
 
     <main class="workspace">
@@ -32,7 +35,43 @@
         </div>
       </header>
 
-      <section class="content-view active" id="personasView" data-view="personas">
+      <section class="content-view active" id="homeView" data-view="home">
+        <div class="home-canvas">
+          <section class="welcome-panel">
+            <span class="eyebrow">Welcome to CX Lab</span>
+            <h2>Your CX dojo for agent training and experimenting.</h2>
+            <p>Design persona-specific experiments, replay voice interactions, prune weak branches, and promote the next best containment strategy.</p>
+          </section>
+
+          <section class="recent-panel">
+            <div class="section-head">
+              <div>
+                <span class="eyebrow">See recent experiments</span>
+                <h3>Recent persona runs</h3>
+              </div>
+            </div>
+            <div class="recent-list">
+              <button class="recent-row" data-view-target="history" type="button">
+                <span class="avatar">MR</span>
+                <span><strong>Maya R.</strong><small>VIP parent - urgent birthday delivery</small></span>
+                <b>History</b>
+              </button>
+              <button class="recent-row" data-view-target="history" type="button">
+                <span class="avatar blue">AX</span>
+                <span><strong>Alex T.</strong><small>First-time buyer - anniversary outfit delayed</small></span>
+                <b>History</b>
+              </button>
+              <button class="recent-row" data-view-target="history" type="button">
+                <span class="avatar amber">JD</span>
+                <span><strong>Jordan K.</strong><small>Discount shopper - graduation present late</small></span>
+                <b>History</b>
+              </button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="content-view" id="personasView" data-view="personas">
         <aside class="left-panel">
           <div class="panel-title">
             <span>Persona library</span>
