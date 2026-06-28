@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 import { WebSocketServer } from "ws";
 import { selectTts } from "./providers/tts/index.js";
 import { detectAndTranslate } from "./providers/translate.js";
+import { attachGeminiLive } from "./providers/voice/geminiLive.js";
 import { env } from "./lib/env.js";
 
 const app = express();
@@ -39,11 +40,7 @@ server.on("upgrade", (req, socket, head) => {
   }
 });
 
-wss.on("connection", (ws) => {
-  ws.on("message", (data, isBinary) => {
-    ws.send(isBinary ? data : data.toString());
-  });
-});
+wss.on("connection", (clientWs) => attachGeminiLive(clientWs));
 
 server.listen(env.port, () => {
   console.log(`http://localhost:${env.port}`);
