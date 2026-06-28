@@ -488,7 +488,7 @@ dd {
 .branch-map {
   display: block;
   width: 100%;
-  min-height: 340px;
+  min-height: 370px;
   margin: 18px 0 2px;
   overflow: visible;
 }
