@@ -823,27 +823,64 @@ function liveMetrics(frustration, contained) {
   return [`${containment}%`, String(nps), `${risk}%`];
 }
 
-// Real voice turn: STT text -> translate/sentiment -> branch tree -> Gemini agent reply -> TTS.
-async function handleLiveUtterance(rawText) {
+// Append just a transcript bubble (text only) and scroll. Returns the element.
+function appendTurnBubble(speaker, text) {
+  const item = document.createElement("article");
+  item.className = `turn ${speaker === "agent" ? "agent" : "shopper"}`;
+  item.innerHTML = `<span>${speaker}</span><p>${text}</p>`;
+  liveTranscript.appendChild(item);
+  requestAnimationFrame(() => { liveTranscript.scrollTop = liveTranscript.scrollHeight; });
+  return item;
+}
+
+// Update the side panel (predictions / sentiment / metrics) independently of the transcript.
+function updateLivePanel({ predictions, sentiment, metrics }) {
+  if (predictions && predictions.length) renderPredictions(predictions);
+  if (sentiment) {
+    sentimentValue.textContent = sentiment[0];
+    sentimentFill.style.width = sentiment[1];
+  }
+  if (metrics) {
+    [liveContainment.textContent, liveNps.textContent, liveRisk.textContent] = metrics;
+  }
+}
+
+// Real voice turn. The shopper's words (original language + translation) are printed
+// IMMEDIATELY; sentiment, branch predictions, the Gemini agent reply, and TTS then fill in.
+async function handleLiveUtterance(captured) {
   const persona = demoState.activePersona;
   const contained = persona === "john";
-  // Genuine speech only — never substitute a scripted line for what the shopper said.
-  const raw = (rawText || "").trim();
-  if (!raw) {
+  // captured may be { original, english } (from the live socket) or a plain string.
+  const original = (typeof captured === "object" && captured ? captured.original : captured || "").toString().trim();
+  const englishLive = (typeof captured === "object" && captured ? captured.english : "").toString().trim();
+  const said = original || englishLive;
+  if (!said) {
     setVoiceStatus("ready", "Didn't catch any speech — unmute and try again");
     return;
   }
   if (!liveProfile.classList.contains("identified")) identifyCaller(persona);
-  setVoiceStatus("live", "Translating + scoring");
 
-  // 1. Real translation + sentiment of what the shopper actually said
-  const translation = await callTranslationProbe(raw);
-  const english = translation?.english || raw;
-  const frustration = translation?.sentiment?.frustration ?? (/refund|cancel/i.test(english) ? 0.78 : 0.4);
+  // ── 1. PRINT THE SHOPPER'S WORDS IMMEDIATELY (no waiting on the agent pipeline) ──
+  const shopperEl = appendTurnBubble("shopper", said);
+  demoState.liveTurns.push({ speaker: "shopper", text: englishLive || original });
+  setVoiceStatus("live", "Scoring + predicting");
+
+  // ── 2. Sentiment + language. Only show a translation when it was NOT English,
+  //       and embed it inside the shopper bubble (no separate duplicate text). ──
+  const translation = await callTranslationProbe(englishLive || original);
+  let english = englishLive || translation?.english || original;
+  const isNonEnglish = !!(translation && translation.lang && !String(translation.lang).startsWith("en"));
+  if (isNonEnglish) {
+    const translated = (translation.english || englishLive || "").trim();
+    if (translated && translated.toLowerCase() !== said.toLowerCase()) {
+      shopperEl.insertAdjacentHTML("beforeend", `<p class="turn-translation">↳ ${translated}</p>`);
+    }
+  }
+  const frustration = translation?.sentiment?.frustration ?? (/refund|cancel|no me ayuda/i.test(english) ? 0.78 : 0.4);
   const sentimentLabel = translation?.sentiment?.label || (frustration > 0.6 ? "frustrated" : "neutral");
-  const tags = translation?.tags || [];
+  updateLivePanel({ sentiment: [sentimentLabel, `${Math.round((1 - frustration) * 100)}%`], metrics: liveMetrics(frustration, false) });
 
-  // 2. Real branch — the live experiment-tree predictions
+  // ── 3. Branch — the live experiment-tree predictions ──
   let branch = null;
   try {
     branch = await callBranchSocket(english);
@@ -854,27 +891,12 @@ async function handleLiveUtterance(rawText) {
     ? branch.candidates.slice().sort((a, b) => Number(b.score || 0) - Number(a.score || 0)).slice(0, 4)
         .map((c) => [c.predicted_next_intent || c.strategy || "next intent", Math.max(1, Math.min(99, Math.round(Number(c.score || 0) * 100)))])
     : [];
-
-  // Shopper turn — real transcript, real sentiment, real predictions
-  demoState.liveTurns.push({ speaker: "shopper", text: english });
-  appendLiveTurn({
-    speaker: "shopper",
-    text: raw,
-    predictions,
-    sentiment: [sentimentLabel, `${Math.round((1 - frustration) * 100)}%`],
-    metrics: liveMetrics(frustration, false)
-  });
-  if (translation && translation.lang && !String(translation.lang).startsWith("en")) {
-    appendSystemTurn(
-      "Gemini translate",
-      `${english} (${sentimentLabel}, ${Math.round(frustration * 100)}% frustration${tags.length ? "; " + tags.join(", ") : ""})`
-    );
-  }
+  if (predictions.length) updateLivePanel({ predictions });
   if (branch && branch.championStrategy) {
     appendSystemTurn("preload", `Champion branch: ${branch.championStrategy}. Inventory and courier tools queued before the next reply.`);
   }
 
-  // 3. Real, script-steered Gemini agent reply (persona drives baseline vs Gen-3 behaviour)
+  // ── 4. Real, script-steered Gemini agent reply ──
   setVoiceStatus("live", "Agent responding");
   const replyResp = await callAgentReply(english);
   const agentText = (replyResp && replyResp.reply) || (branch && branch.agentResponse) || (contained
@@ -882,16 +904,14 @@ async function handleLiveUtterance(rawText) {
     : "Our standard shipping policy is three to five business days; I can offer a discount but cannot guarantee tomorrow.");
 
   demoState.liveTurns.push({ speaker: "agent", text: agentText });
-  appendLiveTurn({
-    speaker: "agent",
-    text: agentText,
-    predictions,
+  appendTurnBubble("agent", agentText);
+  appendSystemTurn("system signal", contained ? "Inventory-first rescue offered before policy language." : "Policy-first branch — flagged for pruning after call.");
+  updateLivePanel({
     sentiment: contained ? ["recovering", "70%"] : ["tense", `${Math.round((1 - frustration) * 100)}%`],
-    metrics: liveMetrics(frustration, contained),
-    system: contained ? "Inventory-first rescue offered before policy language." : "Policy-first branch — flagged for pruning after call."
+    metrics: liveMetrics(frustration, contained)
   });
 
-  // 4. Real TTS playback of the agent reply
+  // ── 5. Real TTS playback of the agent reply ──
   const tts = await callTtsProbe(agentText);
   if (tts) playAudioFromData(tts.mime, tts.audioBase64);
 
@@ -904,7 +924,8 @@ async function startLiveMic() {
   setNavCollapsed(true);
   clearInterval(liveTimer);
   unlockAudio();
-  liveTranscript.innerHTML = "";
+  // Do NOT clear the transcript here — each unmute continues the same conversation.
+  // Only the per-utterance buffers reset so this turn starts clean.
   demoState.liveInputBuffer = "";
   demoState.liveOutputBuffer = "";
   demoState.pendingCandidates = [];
@@ -928,11 +949,14 @@ async function stopLiveMic() {
   waveform.classList.add("idle");
   setVoiceStatus("live", "Processing utterance");
   // Gemini Live transcription arrives asynchronously after we stop sending audio.
-  // Wait for the final transcript to flush in instead of reading an empty buffer.
-  const captured = await waitForTranscript();
+  // Wait for the final transcript to flush in, then read BOTH the original-language
+  // transcript and the English translation so we can print both immediately.
+  await waitForTranscript();
+  const original = (demoState.liveInputBuffer || "").trim();
+  const english = (demoState.liveOutputBuffer || "").trim();
   demoState.liveInputBuffer = "";
   demoState.liveOutputBuffer = "";
-  await handleLiveUtterance(captured);
+  await handleLiveUtterance({ original, english });
 }
 
 // Poll the live transcription buffers until the text stops changing (final flush) or we hit the cap.
@@ -1501,6 +1525,14 @@ function resetLiveCall() {
       <span>Awaiting caller identification</span>
       <p>Start the mic to identify the caller, transcribe the voice stream, and route the live branch.</p>
     </div>`;
+  // Reset the side panel so no previous-persona predictions/sentiment/metrics linger.
+  predictionBars.innerHTML = "";
+  sentimentValue.textContent = "neutral";
+  sentimentFill.style.width = "50%";
+  liveContainment.textContent = "—";
+  liveNps.textContent = "—";
+  liveRisk.textContent = "—";
+  setPreload("tool preload: waiting for next intent", false);
 }
 
 function setActivePersona(persona) {
