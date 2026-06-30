@@ -2074,3 +2074,12 @@ dd {
   box-shadow: inset 0 -2px 0 var(--green);
 }
 .persona-tab.active[data-persona="john"] small { color: var(--green); }
+
+/* Embedded translation sub-line inside a shopper bubble (only shown for non-English speech) */
+.turn .turn-translation {
+  margin: 7px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--muted);
+  opacity: 0.95;
+}
