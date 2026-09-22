@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 280" role="img" aria-label="CX Lab Dojo recursive self-improvement loop">
+  <rect width="1200" height="280" fill="#f3efe6"/>
+  <rect x="0" y="0" width="8" height="280" fill="#111"/>
+  <rect x="36" y="36" width="56" height="56" rx="14" fill="#111"/>
+  <text x="64" y="71" text-anchor="middle" fill="#f3efe6" font-family="ui-sans-serif, system-ui, sans-serif" font-size="16" font-weight="700" letter-spacing="0.08em">CXL</text>
+  <text x="108" y="58" fill="#6b6458" font-family="ui-sans-serif, system-ui, sans-serif" font-size="12" font-weight="600" letter-spacing="0.22em">AI ENGINEER WORLD'S FAIR · RSI</text>
+  <text x="108" y="88" fill="#111" font-family="ui-sans-serif, system-ui, sans-serif" font-size="34" font-weight="750">CX_lab Dojo</text>
+  <text x="108" y="118" fill="#3d3a34" font-family="ui-sans-serif, system-ui, sans-serif" font-size="16">A voice CX agent that writes the next generation of its own playbook.</text>
+
+  <g font-family="ui-sans-serif, system-ui, sans-serif">
+    <rect x="36" y="156" width="210" height="86" rx="14" fill="#dce8dc" stroke="#c3d4c3"/>
+    <text x="56" y="186" fill="#2f4a34" font-size="11" font-weight="700" letter-spacing="0.16em">DAY</text>
+    <text x="56" y="212" fill="#111" font-size="18" font-weight="700">predict + act</text>
+    <text x="56" y="232" fill="#3d3a34" font-size="12">in-band evidence</text>
+
+    <path d="M256 199 H292" stroke="#111" stroke-width="2"/>
+    <polygon points="292,193 304,199 292,205" fill="#111"/>
+
+    <rect x="312" y="156" width="210" height="86" rx="14" fill="#d9e4f2" stroke="#c3d0e2"/>
+    <text x="332" y="186" fill="#2a3d5c" font-size="11" font-weight="700" letter-spacing="0.16em">SCORE</text>
+    <text x="332" y="212" fill="#111" font-size="18" font-weight="700">prune branches</text>
+    <text x="332" y="232" fill="#3d3a34" font-size="12">keep / promote / kill</text>
+
+    <path d="M532 199 H568" stroke="#111" stroke-width="2"/>
+    <polygon points="568,193 580,199 568,205" fill="#111"/>
+
+    <rect x="588" y="156" width="210" height="86" rx="14" fill="#111"/>
+    <text x="608" y="186" fill="#b8c9b4" font-size="11" font-weight="700" letter-spacing="0.16em">NIGHT</text>
+    <text x="608" y="212" fill="#f3efe6" font-size="18" font-weight="700">dream pass</text>
+    <text x="608" y="232" fill="#cfc8bb" font-size="12">cluster · patch · gate</text>
+
+    <path d="M808 199 H844" stroke="#111" stroke-width="2"/>
+    <polygon points="844,193 856,199 844,205" fill="#111"/>
+
+    <rect x="864" y="156" width="300" height="86" rx="14" fill="#eadfce" stroke="#d4c6b0"/>
+    <text x="884" y="186" fill="#5a4630" font-size="11" font-weight="700" letter-spacing="0.16em">GEN + 1</text>
+    <text x="884" y="212" fill="#111" font-size="18" font-weight="700">eval-gated commit</text>
+    <text x="884" y="232" fill="#3d3a34" font-size="12">versioned playbook + memory</text>
+  </g>
+</svg>
