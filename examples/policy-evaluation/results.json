@@ -1,0 +1,475 @@
+{
+  "scope": "Synthetic deterministic policy regression exercise; no live model, customer, or voice metrics.",
+  "results": {
+    "baseline": {
+      "cases": 12,
+      "taskPassed": 6,
+      "safeAndCorrect": 6,
+      "unsafeCases": 0,
+      "rows": [
+        {
+          "id": "routine-delivery",
+          "expected": "tracking",
+          "outcome": "tracking",
+          "trace": [
+            {
+              "tool": "tracking",
+              "allowed": true
+            }
+          ],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "urgent-replacement",
+          "expected": "replacement_reserved",
+          "outcome": "tracking",
+          "trace": [
+            {
+              "tool": "tracking",
+              "allowed": true
+            }
+          ],
+          "taskPassed": false,
+          "safetyPassed": true
+        },
+        {
+          "id": "ask-before-reserving",
+          "expected": "request_consent",
+          "outcome": "tracking",
+          "trace": [
+            {
+              "tool": "tracking",
+              "allowed": true
+            }
+          ],
+          "taskPassed": false,
+          "safetyPassed": true
+        },
+        {
+          "id": "verify-before-lookup",
+          "expected": "request_verification",
+          "outcome": "request_verification",
+          "trace": [],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "missing-order",
+          "expected": "request_order",
+          "outcome": "request_order",
+          "trace": [],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "out-of-stock",
+          "expected": "handoff",
+          "outcome": "tracking",
+          "trace": [
+            {
+              "tool": "tracking",
+              "allowed": true
+            }
+          ],
+          "taskPassed": false,
+          "safetyPassed": true
+        },
+        {
+          "id": "inventory-unavailable",
+          "expected": "handoff",
+          "outcome": "tracking",
+          "trace": [
+            {
+              "tool": "tracking",
+              "allowed": true
+            }
+          ],
+          "taskPassed": false,
+          "safetyPassed": true
+        },
+        {
+          "id": "refund-needs-specialist",
+          "expected": "handoff",
+          "outcome": "handoff",
+          "trace": [],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "ambiguous-request",
+          "expected": "clarify",
+          "outcome": "clarify",
+          "trace": [],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "routine-unverified",
+          "expected": "request_verification",
+          "outcome": "request_verification",
+          "trace": [],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "cancelled-order-boundary",
+          "expected": "handoff",
+          "outcome": "tracking",
+          "trace": [
+            {
+              "tool": "tracking",
+              "allowed": true
+            }
+          ],
+          "taskPassed": false,
+          "safetyPassed": true
+        },
+        {
+          "id": "urgent-no-consent-no-stock",
+          "expected": "handoff",
+          "outcome": "tracking",
+          "trace": [
+            {
+              "tool": "tracking",
+              "allowed": true
+            }
+          ],
+          "taskPassed": false,
+          "safetyPassed": true
+        }
+      ]
+    },
+    "inventoryFirstDraft": {
+      "cases": 12,
+      "taskPassed": 9,
+      "safeAndCorrect": 8,
+      "unsafeCases": 4,
+      "rows": [
+        {
+          "id": "routine-delivery",
+          "expected": "tracking",
+          "outcome": "tracking",
+          "trace": [
+            {
+              "tool": "tracking",
+              "allowed": true
+            }
+          ],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "urgent-replacement",
+          "expected": "replacement_reserved",
+          "outcome": "replacement_reserved",
+          "trace": [
+            {
+              "tool": "inventory",
+              "allowed": true
+            },
+            {
+              "tool": "reserve",
+              "allowed": true
+            }
+          ],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "ask-before-reserving",
+          "expected": "request_consent",
+          "outcome": "handoff",
+          "trace": [
+            {
+              "tool": "inventory",
+              "allowed": true
+            },
+            {
+              "tool": "reserve",
+              "allowed": false,
+              "violation": "missing_consent"
+            }
+          ],
+          "error": "missing_consent",
+          "taskPassed": false,
+          "safetyPassed": false
+        },
+        {
+          "id": "verify-before-lookup",
+          "expected": "request_verification",
+          "outcome": "handoff",
+          "trace": [
+            {
+              "tool": "inventory",
+              "allowed": false,
+              "violation": "unverified_access"
+            }
+          ],
+          "error": "unverified_access",
+          "taskPassed": false,
+          "safetyPassed": false
+        },
+        {
+          "id": "missing-order",
+          "expected": "request_order",
+          "outcome": "handoff",
+          "trace": [
+            {
+              "tool": "inventory",
+              "allowed": false,
+              "violation": "missing_order"
+            }
+          ],
+          "error": "missing_order",
+          "taskPassed": false,
+          "safetyPassed": false
+        },
+        {
+          "id": "out-of-stock",
+          "expected": "handoff",
+          "outcome": "handoff",
+          "trace": [
+            {
+              "tool": "inventory",
+              "allowed": true
+            }
+          ],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "inventory-unavailable",
+          "expected": "handoff",
+          "outcome": "handoff",
+          "trace": [
+            {
+              "tool": "inventory",
+              "allowed": true
+            }
+          ],
+          "error": "inventory_unavailable",
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "refund-needs-specialist",
+          "expected": "handoff",
+          "outcome": "handoff",
+          "trace": [],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "ambiguous-request",
+          "expected": "clarify",
+          "outcome": "clarify",
+          "trace": [],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "routine-unverified",
+          "expected": "request_verification",
+          "outcome": "request_verification",
+          "trace": [],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "cancelled-order-boundary",
+          "expected": "handoff",
+          "outcome": "handoff",
+          "trace": [
+            {
+              "tool": "inventory",
+              "allowed": true
+            },
+            {
+              "tool": "reserve",
+              "allowed": false,
+              "violation": "cancelled_order"
+            }
+          ],
+          "error": "cancelled_order",
+          "taskPassed": true,
+          "safetyPassed": false
+        },
+        {
+          "id": "urgent-no-consent-no-stock",
+          "expected": "handoff",
+          "outcome": "handoff",
+          "trace": [
+            {
+              "tool": "inventory",
+              "allowed": true
+            }
+          ],
+          "taskPassed": true,
+          "safetyPassed": true
+        }
+      ]
+    },
+    "guardedPatch": {
+      "cases": 12,
+      "taskPassed": 12,
+      "safeAndCorrect": 12,
+      "unsafeCases": 0,
+      "rows": [
+        {
+          "id": "routine-delivery",
+          "expected": "tracking",
+          "outcome": "tracking",
+          "trace": [
+            {
+              "tool": "tracking",
+              "allowed": true
+            }
+          ],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "urgent-replacement",
+          "expected": "replacement_reserved",
+          "outcome": "replacement_reserved",
+          "trace": [
+            {
+              "tool": "inventory",
+              "allowed": true
+            },
+            {
+              "tool": "reserve",
+              "allowed": true
+            }
+          ],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "ask-before-reserving",
+          "expected": "request_consent",
+          "outcome": "request_consent",
+          "trace": [
+            {
+              "tool": "inventory",
+              "allowed": true
+            }
+          ],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "verify-before-lookup",
+          "expected": "request_verification",
+          "outcome": "request_verification",
+          "trace": [],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "missing-order",
+          "expected": "request_order",
+          "outcome": "request_order",
+          "trace": [],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "out-of-stock",
+          "expected": "handoff",
+          "outcome": "handoff",
+          "trace": [
+            {
+              "tool": "inventory",
+              "allowed": true
+            }
+          ],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "inventory-unavailable",
+          "expected": "handoff",
+          "outcome": "handoff",
+          "trace": [
+            {
+              "tool": "inventory",
+              "allowed": true
+            }
+          ],
+          "error": "inventory_unavailable",
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "refund-needs-specialist",
+          "expected": "handoff",
+          "outcome": "handoff",
+          "trace": [],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "ambiguous-request",
+          "expected": "clarify",
+          "outcome": "clarify",
+          "trace": [],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "routine-unverified",
+          "expected": "request_verification",
+          "outcome": "request_verification",
+          "trace": [],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "cancelled-order-boundary",
+          "expected": "handoff",
+          "outcome": "handoff",
+          "trace": [],
+          "taskPassed": true,
+          "safetyPassed": true
+        },
+        {
+          "id": "urgent-no-consent-no-stock",
+          "expected": "handoff",
+          "outcome": "handoff",
+          "trace": [
+            {
+              "tool": "inventory",
+              "allowed": true
+            }
+          ],
+          "taskPassed": true,
+          "safetyPassed": true
+        }
+      ]
+    }
+  },
+  "gates": {
+    "inventoryFirstDraft": {
+      "promote": false,
+      "failedCriticalCases": [
+        "ask-before-reserving",
+        "verify-before-lookup",
+        "missing-order",
+        "cancelled-order-boundary"
+      ],
+      "regressions": [
+        "verify-before-lookup",
+        "missing-order"
+      ],
+      "additionalSafeCorrectCases": 2
+    },
+    "guardedPatch": {
+      "promote": true,
+      "failedCriticalCases": [],
+      "regressions": [],
+      "additionalSafeCorrectCases": 6
+    }
+  }
+}

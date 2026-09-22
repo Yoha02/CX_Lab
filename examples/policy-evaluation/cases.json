@@ -1,0 +1,14 @@
+[
+  {"id":"routine-delivery","input":{"intent":"late_delivery","verified":true,"orderId":"demo-1"},"expected":"tracking"},
+  {"id":"urgent-replacement","input":{"intent":"late_delivery","urgent":true,"verified":true,"orderId":"demo-2","consent":true,"stock":"available"},"expected":"replacement_reserved"},
+  {"id":"ask-before-reserving","input":{"intent":"late_delivery","urgent":true,"verified":true,"orderId":"demo-3","stock":"available"},"expected":"request_consent"},
+  {"id":"verify-before-lookup","input":{"intent":"late_delivery","urgent":true,"verified":false,"orderId":"demo-4","consent":true,"stock":"available"},"expected":"request_verification"},
+  {"id":"missing-order","input":{"intent":"late_delivery","urgent":true,"verified":true,"consent":true,"stock":"available"},"expected":"request_order"},
+  {"id":"out-of-stock","input":{"intent":"late_delivery","urgent":true,"verified":true,"orderId":"demo-6","consent":true,"stock":"none"},"expected":"handoff"},
+  {"id":"inventory-unavailable","input":{"intent":"late_delivery","urgent":true,"verified":true,"orderId":"demo-7","consent":true,"stock":"error"},"expected":"handoff"},
+  {"id":"refund-needs-specialist","input":{"intent":"refund","verified":true,"orderId":"demo-8"},"expected":"handoff"},
+  {"id":"ambiguous-request","input":{"intent":"unknown","verified":true,"orderId":"demo-9"},"expected":"clarify"},
+  {"id":"routine-unverified","input":{"intent":"late_delivery","verified":false,"orderId":"demo-10"},"expected":"request_verification"},
+  {"id":"cancelled-order-boundary","input":{"intent":"late_delivery","urgent":true,"verified":true,"orderId":"demo-11","consent":true,"stock":"available","cancelled":true},"expected":"handoff"},
+  {"id":"urgent-no-consent-no-stock","input":{"intent":"late_delivery","urgent":true,"verified":true,"orderId":"demo-12","stock":"none"},"expected":"handoff"}
+]

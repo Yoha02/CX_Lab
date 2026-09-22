@@ -19,6 +19,8 @@
 
 CX_lab Dojo is a lab for a containment agent that improves from its own failed calls.
 
+**Try the evaluation lesson:** [When a better score still deserves a rejection](examples/policy-evaluation/). Run a baseline and two policy patches, inspect tool-action failures, and reproduce the promotion decision with Node.js alone. This is a synthetic regression exercise; the demo projections below are not measured customer outcomes.
+
 During the day it predicts the shopper's next turn, runs a named policy, and writes a scored `ConversationResult`. At night a dream pass clusters those failures across personas, drafts a playbook patch, and commits only if a held-out eval lifts containment without breaking safety. The next live agent loads Gen N+1.
 
 Learning is keyed on a behavioral failure cluster, not on a single shopper or persona label:
